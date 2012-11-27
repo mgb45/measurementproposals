@@ -73,6 +73,7 @@ cv::Mat ParticleFilter::getEstimator()
 void ParticleFilter::predict()
 {
 	cv::Mat temp(1,d,CV_64F);
+	//particles = particles + temp;
 	for (int i = 0; i < N; i++)
 	{
 		cv::randn(temp,0,15);
@@ -81,22 +82,11 @@ void ParticleFilter::predict()
 	}
 }
 
-/*double ParticleFilter::mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma)
-{
-//	cout << x << std::endl;
-	cv::Mat sigma_i;
-	invert(sigma,sigma_i,DECOMP_LU);
-	cv::Mat x_u(x.size(),x.type());
-	x_u = x - u;
-	cv::Mat temp = -1.0/2.0*x_u*sigma_i*x_u.t();
-	return 1.0/(pow(2.0*M_PI,sigma.rows/2.0)*sqrt(cv::determinant(sigma)))*exp(temp.at<double>(0,0));
-}*/
-
 double ParticleFilter::mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma)
 {
 //	cout << x << std::endl;
 	cv::Mat sigma_i;
-	invert(sigma,sigma_i,DECOMP_LU);
+	invert(sigma,sigma_i,DECOMP_CHOLESKY);
 	cv::Mat x_u(x.size(),x.type());
 	x_u = x - u;
 	cv::Mat temp = -1.0/2.0*x_u*sigma_i*x_u.t();
@@ -123,8 +113,8 @@ cv::Mat ParticleFilter::closestMeasurement(cv::Mat measurements, cv::Mat particl
 void ParticleFilter::update(cv::Mat measurement)
 {
 	// Pick best measurement for each particle!
-	time_t begin, end; 
-	time(&begin);
+	time_t  start_time = clock(), end_time;
+	float time1;
 	double prior[N];
 	double likelihood[N];
 	double weightSum = 0;
@@ -150,13 +140,17 @@ void ParticleFilter::update(cv::Mat measurement)
 	{
 		weights[i] = weights[i]/weightSum;
 	}
-	time(&end);
-	cout << "Update: " << difftime(end, begin) << " seconds" << endl;
 	
-	time(&begin);
+	end_time = clock();
+	time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
+	start_time = end_time;
+	printf("Update: %f seconds\n", time1);
+		
 	resample();
-	time(&end);
-	cout << "Resample: " << difftime(end, begin) << " seconds" << endl;
+	end_time = clock();
+	time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
+	start_time = end_time;
+	printf("Resample: %f seconds\n", time1);
 	
 	// Plot weights
 	cv::Mat weightImage =cv::Mat::zeros(480,640,CV_8UC3);
@@ -173,10 +167,11 @@ void ParticleFilter::update(cv::Mat measurement)
 	imshow (fname, weightImage);                   // Show our image inside it.
 	waitKey(50);
 	
-	time(&begin);
 	predict();
-	time(&end);
-	cout << "Predict: " << difftime(end, begin) << " seconds" << endl;
+	end_time = clock();
+	time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
+	start_time = end_time;
+	printf("Predict: %f seconds\n", time1);
 	
 }
 
@@ -199,7 +194,7 @@ void ParticleFilter::resample()
 	int idx = rand() % N;
 	double beta = 0.0;
 	double mw = maxWeight();
-	cout << mw << std::endl;
+	cout << "Max weight: " << mw << std::endl;
 	if (mw == 0)
 	{
 		for (int i = 0; i < d; i++)
@@ -221,18 +216,6 @@ void ParticleFilter::resample()
 	}
 	else
 	{
-/*		for (int i = 0; i < N; i++)
-		{
-			//cout << i << std::endl;
-			beta += ((double)rand()/RAND_MAX)*mw*2.0;
-			while (beta > weights[idx])
-			{
-				beta -= weights[idx];
-				idx = (idx + 1)%N;
-			}
-			particles.row(i) = old_particles.row(idx);
-		}*/
-		
 		idx = 0;
 		double step = 1.0 / (double)N;
 		beta = ((double)rand()/RAND_MAX)*step;
@@ -245,7 +228,6 @@ void ParticleFilter::resample()
 				idx = (idx + 1) % N;
 			}
 			beta += step;
-			//cout << idx << std::endl;
 			particles.row(i) = particles.row(i) + old_particles.row(idx);
 		}
 	}
