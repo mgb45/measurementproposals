@@ -1,0 +1,21 @@
+<package>
+  <description brief="handBlobTracker">
+
+     handBlobTracker
+
+  </description>
+  <author>michael</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/handBlobTracker</url>
+  <depend package="roscpp"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="sensor_msgs"/>
+  <depend package="image_transport"/>
+  <depend package="rospy"/>
+  <depend package="message_filters"/>
+  <depend package="faceTracking"/>
+</package>
+
+
