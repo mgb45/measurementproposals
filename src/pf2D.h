@@ -16,7 +16,8 @@ class my_gmm
 		~my_gmm();
 		void loadGaussian(cv::Mat mean, cv::Mat sigma, double weight);
 		std::vector<cv::Mat> mean;
-		std::vector<cv::Mat> sigma;
+		std::vector<cv::Mat> sigma_i;
+		std::vector<double> det_s;
 		std::vector<double> weight;
 		int N;
 };
@@ -35,8 +36,10 @@ class ParticleFilter
 
 		void resample();
 		double mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma);
+		double gmmmvnpdf(cv::Mat x_u, cv::Mat sigma_i, double det_in);
+		double eyemvnpdf(cv::Mat x_u, double sigma);
 		double maxWeight();
-		cv::Mat closestMeasurement(cv::Mat measurements, cv::Mat particle);
+	//	cv::Mat closestMeasurement(cv::Mat measurements, cv::Mat particle);
 		int N;
 		int d;
 		bool side;

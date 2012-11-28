@@ -11,7 +11,8 @@ my_gmm::my_gmm()
 my_gmm::~my_gmm()
 {
 	mean.clear();
-	sigma.clear();
+	sigma_i.clear();
+	det_s.clear();
 	weight.clear();
 	N = 0;
 }
@@ -20,7 +21,10 @@ void my_gmm::loadGaussian(cv::Mat u, cv::Mat s, double w)
 {
 	N++;
 	mean.push_back(u);
-	sigma.push_back(s);
+	cv::Mat temp;
+	invert(s,temp,DECOMP_CHOLESKY);
+	sigma_i.push_back(temp);
+	det_s.push_back(1.0/(pow(2.0*M_PI,u.cols/2.0)*sqrt(cv::determinant(s))));
 	weight.push_back(w);
 }
 
@@ -82,6 +86,12 @@ void ParticleFilter::predict()
 	}
 }
 
+double ParticleFilter::gmmmvnpdf(cv::Mat x_u, cv::Mat sigma_i, double det_in)
+{
+	cv::Mat temp = -0.5*x_u*sigma_i*x_u.t();
+	return det_in*exp(temp.at<double>(0,0));
+}
+
 double ParticleFilter::mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma)
 {
 //	cout << x << std::endl;
@@ -89,11 +99,17 @@ double ParticleFilter::mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma)
 	invert(sigma,sigma_i,DECOMP_CHOLESKY);
 	cv::Mat x_u(x.size(),x.type());
 	x_u = x - u;
-	cv::Mat temp = -1.0/2.0*x_u*sigma_i*x_u.t();
+	cv::Mat temp = -0.5*x_u*sigma_i*x_u.t();
 	return 1.0/(pow(2.0*M_PI,sigma.rows/2.0)*sqrt(cv::determinant(sigma)))*exp(temp.at<double>(0,0));
 }
 
-cv::Mat ParticleFilter::closestMeasurement(cv::Mat measurements, cv::Mat particle)
+double ParticleFilter::eyemvnpdf(cv::Mat x_u, double scale)
+{
+	cv::Mat temp = -0.5*x_u*1.0/scale*cv::Mat::eye(2,2,CV_64F)*x_u.t();
+	return 1.0/(pow(2.0*M_PI,x_u.cols/2.0)*scale)*exp(temp.at<double>(0,0));
+}
+
+/*cv::Mat ParticleFilter::closestMeasurement(cv::Mat measurements, cv::Mat particle)
 {
 	double dmin = 10000,temp = 0;
 	int minidx = -1;
@@ -108,7 +124,7 @@ cv::Mat ParticleFilter::closestMeasurement(cv::Mat measurements, cv::Mat particl
 		}
 	}
 	return measurements.row(minidx);
-}
+}*/
 
 void ParticleFilter::update(cv::Mat measurement)
 {
@@ -118,24 +134,31 @@ void ParticleFilter::update(cv::Mat measurement)
 	double prior[N];
 	double likelihood[N];
 	double weightSum = 0;
+	int i, j ;
+	//#pragma omp parallel 
+	//{
+	//#pragma omp for reduction(+: weightSum) 
 	for (int i = 0; i < N; i++)
 	{
 		prior[i] = 0;
-		likelihood[i] = 1;
+		//likelihood[i] = 1;
+		//#pragma omp parallel for
 		for (int j = 0; j < gmm.N; j++)
 		{
-			prior[i] = prior[i] + gmm.weight[j]*mvnpdf(particles.row(i),gmm.mean[j],gmm.sigma[j]);
+			//prior[i] = prior[i] + gmm.weight[j]*mvnpdf(particles.row(i),gmm.mean[j],gmm.sigma[j]);
+			prior[i] = prior[i] + gmm.weight[j]*gmmmvnpdf(particles.row(i)- gmm.mean[j], gmm.sigma_i[j], gmm.det_s[j]);
 		}
 		//closestMeasurement(measurement,particles(Range(i,i+1),Range(0,2)))
-		likelihood[i] *= mvnpdf(particles(Range(i,i+1),Range(6,8)),measurement.row(0),15*cv::Mat::eye(2,2,CV_64F));
-		likelihood[i] *= mvnpdf(particles(Range(i,i+1),Range(0,2)),measurement.row(1),15*cv::Mat::eye(2,2,CV_64F));
 		//likelihood[i] *= mvnpdf(particles(Range(i,i+1),Range(6,8)),measurement.row(0),15*cv::Mat::eye(2,2,CV_64F));
-		//likelihood[i] *= mvnpdf(particles(Range(i,i+1),Range(0,2)),closestMeasurement(measurement.rowRange(1,measurement.rows),particles(Range(i,i+1),Range(0,2))),15*cv::Mat::eye(2,2,CV_64F));
+		//likelihood[i] *= mvnpdf(particles(Range(i,i+1),Range(0,2)),measurement.row(1),15*cv::Mat::eye(2,2,CV_64F));
+		likelihood[i] = eyemvnpdf(particles(Range(i,i+1),Range(6,8))-measurement.row(0),15)*eyemvnpdf(particles(Range(i,i+1),Range(0,2))-measurement.row(1),15);
 		// Arm order!
 		weights[i] = prior[i]*likelihood[i];
 		weightSum += weights[i];
 	}
-	
+	//}
+
+	//#pragma omp parallel for
 	for (int i = 0; i < N; i++)
 	{
 		weights[i] = weights[i]/weightSum;
@@ -154,7 +177,7 @@ void ParticleFilter::update(cv::Mat measurement)
 	
 	// Plot weights
 	cv::Mat weightImage =cv::Mat::zeros(480,640,CV_8UC3);
-	for (int i = 1; i < N; i++)
+	/*for (int i = 1; i < N; i++)
 	{
 		line(weightImage, Point(480*(double)i/(double)N, 640 - cvRound(639*weights[i-1]+1)), Point(480*(double)(i+1)/(double)N, 640 - cvRound(639*weights[i]+1)), Scalar(255, 0, 0), 2, 8, 0);
 		circle(weightImage, Point(particles.at<double>(i,0),particles.at<double>(i,1)), 1, Scalar( 0, 0, 255), 1, 8);
@@ -165,7 +188,7 @@ void ParticleFilter::update(cv::Mat measurement)
 	char fname[20];
 	sprintf (fname,"win%d",side);
 	imshow (fname, weightImage);                   // Show our image inside it.
-	waitKey(50);
+	waitKey(50);*/
 	
 	predict();
 	end_time = clock();
