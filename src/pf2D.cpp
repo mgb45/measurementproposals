@@ -80,7 +80,9 @@ void ParticleFilter::predict()
 	//particles = particles + temp;
 	for (int i = 0; i < N; i++)
 	{
-		cv::randn(temp,0,15);
+		cv::randn(temp.colRange(2,6),0,15);
+		cv::randn(temp.colRange(6,8),0,5);
+		cv::randn(temp.colRange(0,2),0,5);
 		//cout << temp;
 		particles.row(i) = particles.row(i) + temp;
 	}
