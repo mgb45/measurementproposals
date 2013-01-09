@@ -185,10 +185,11 @@ cv::Mat BlobTracker::segmentFaces(cv::Mat input, body &face_in)
 	vector<Mat> bgr_planes;
 	split(image4, bgr_planes);
 				
-	int bestIdx1 = 0, bestIdx2 = 0;
-	double tempMax1=0, tempMax2=0;
+	int bestIdx1 = 0, bestIdx2 = 0, bestIdx3 = 0;
+	/*double tempMax1=0, tempMax2=0, tempMax3=0;
 	for (int i = 0; i < (int)face_in.gmm_params1.size(); i++)
 	{
+		ROS_WARN("%f %f %f",face_in.gmm_params1[i].weight,face_in.gmm_params1[i].mean,face_in.gmm_params1[i].sigma);
 		if (face_in.gmm_params1[i].weight > tempMax1)
 		{
 			tempMax1 = face_in.gmm_params1[i].weight;
@@ -199,22 +200,34 @@ cv::Mat BlobTracker::segmentFaces(cv::Mat input, body &face_in)
 			tempMax2 = face_in.gmm_params2[i].weight;
 					bestIdx2 = i;
 		}
-	}
+		if (face_in.gmm_params3[i].weight > tempMax3)
+		{
+			tempMax3 = face_in.gmm_params3[i].weight;
+			bestIdx3 = i;
+		}
+	}*/
 			
 	cv::Mat temp1(input.rows,input.cols,CV_64F);
 	for (int i = 0; i < input.rows; i++)
 	{
 		for (int k = 0; k < input.cols; k++)
 		{	
-			double p1 = 0;
-			p1 = 1.0/(face_in.gmm_params1[bestIdx1].sigma*sqrt(2*M_PI))*exp(-pow(std::min(bgr_planes[1].at<uchar>(i,k)-face_in.gmm_params1[bestIdx1].mean,255-(bgr_planes[1].at<uchar>(i,k)-face_in.gmm_params1[bestIdx1].mean)),2)/(2*pow(face_in.gmm_params1[bestIdx1].sigma,2)));
-			p1 = p1*1.0/(face_in.gmm_params2[bestIdx2].sigma*sqrt(2*M_PI))*exp(-pow(std::min(bgr_planes[2].at<uchar>(i,k)-face_in.gmm_params2[bestIdx2].mean,255-(bgr_planes[2].at<uchar>(i,k)-face_in.gmm_params2[bestIdx2].mean)),2)/(2*pow(face_in.gmm_params2[bestIdx2].sigma,2)));
-			temp1.at<double>(i,k) = p1;
+			double p1 = 0, p2 = 0, p3 = 0;
+			for (int j = 0; j < (int)face_in.gmm_params1.size(); j++)
+			{
+				bestIdx1 = j;
+				bestIdx2 = j;
+				bestIdx3 = j;
+				//ROS_WARN("%f %f %f",face_in.gmm_params1[bestIdx1].weight,face_in.gmm_params1[bestIdx1].mean,face_in.gmm_params1[bestIdx1].sigma);
+				p1 = p1+face_in.gmm_params1[bestIdx1].weight*1.0/(face_in.gmm_params1[bestIdx1].sigma*sqrt(2*M_PI))*exp(-pow(std::min(bgr_planes[1].at<uchar>(i,k)-face_in.gmm_params1[bestIdx1].mean,255-(bgr_planes[1].at<uchar>(i,k)-face_in.gmm_params1[bestIdx1].mean)),2)/(2*pow(face_in.gmm_params1[bestIdx1].sigma,2)));
+				p2 = p2+face_in.gmm_params2[bestIdx2].weight*1.0/(face_in.gmm_params2[bestIdx2].sigma*sqrt(2*M_PI))*exp(-pow(std::min(bgr_planes[2].at<uchar>(i,k)-face_in.gmm_params2[bestIdx2].mean,255-(bgr_planes[2].at<uchar>(i,k)-face_in.gmm_params2[bestIdx2].mean)),2)/(2*pow(face_in.gmm_params2[bestIdx2].sigma,2)));
+				p3 = p3+face_in.gmm_params3[bestIdx3].weight*1.0/(face_in.gmm_params3[bestIdx3].sigma*sqrt(2*M_PI))*exp(-pow(std::min(bgr_planes[0].at<uchar>(i,k)-face_in.gmm_params3[bestIdx3].mean,255-(bgr_planes[0].at<uchar>(i,k)-face_in.gmm_params3[bestIdx3].mean)),2)/(2*pow(face_in.gmm_params3[bestIdx3].sigma,2)));
+			}
+			temp1.at<double>(i,k) = p1*p2*p3;
 		}
 	}
 	
 	
-			
 	temp1 = temp1/cv::sum(temp1)[0];
 	double minVal,maxVal;
 			
@@ -307,10 +320,13 @@ void BlobTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 				vector<cv::Mat> bgr_planes;
 				blur(image3,image3,Size(15,15));
 				split(image3, bgr_planes);
-				
+				//for (int n = 0; n < 100; n++)
+				//{
 				faces[i].gmm_params1 = gmm_model->expectationMaximisation(faces[i].gmm_params1, bgr_planes[1]);
 				faces[i].gmm_params2 = gmm_model->expectationMaximisation(faces[i].gmm_params2, bgr_planes[2]);
-				histImages.push_back(getHistogram(image,tempRoi,faces[i].gmm_params1,faces[i].gmm_params2));
+				faces[i].gmm_params3 = gmm_model->expectationMaximisation(faces[i].gmm_params3, bgr_planes[0]);
+			//}
+				histImages.push_back(getHistogram(image,tempRoi,faces[i].gmm_params1,faces[i].gmm_params2,faces[i].gmm_params3));
 
 				
 				Mat roiImgResult_top = bigImage(Rect(posx, 0, image.cols, image.rows));
@@ -341,7 +357,7 @@ void BlobTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 	}		
 }
 
-cv::Mat BlobTracker::getHistogram(cv::Mat input, cv::Rect roi, std::vector<model_params> gmm_params1, std::vector<model_params> gmm_params2)
+cv::Mat BlobTracker::getHistogram(cv::Mat input, cv::Rect roi, std::vector<model_params> gmm_params1, std::vector<model_params> gmm_params2, std::vector<model_params> gmm_params3)
 {
 	cv::Rect tempRoi;
 	tempRoi.x = roi.x + roi.width/5.0;
@@ -359,26 +375,30 @@ cv::Mat BlobTracker::getHistogram(cv::Mat input, cv::Rect roi, std::vector<model
 	float range[] = {0, 255} ;
 	const float* histRange = {range};
 				
-	Mat b_hist, r_hist;
+	Mat b_hist, r_hist, g_hist;
 	calcHist(&bgr_planes[1], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, true, false);
 	calcHist(&bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, true, false);
+	calcHist(&bgr_planes[0], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, true, false);
 	int hist_w = 512; int hist_h = 400;
 	int bin_w = cvRound((double)hist_w/histSize);
 
 	Mat histImage(hist_h, hist_w, CV_8UC3, Scalar(0, 0, 0));
 	normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
 	normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+	normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
 		  
-	double f1[histSize], f2[histSize];
-	double maxf1 = 0, maxf2 = 0;
+	double f1[histSize], f2[histSize], f3[histSize];
+	double maxf1 = 0, maxf2 = 0, maxf3 = 0;
 	for (int i = 0; i < histSize; i++)
 	{
 		f1[i] = 0;
 		f2[i] = 0;
+		f3[i] = 0;
 		for (int k = 0; k < (int)gmm_params1.size(); k++)
 		{
 			f1[i] = f1[i] + gmm_params1[k].weight*1/(gmm_params1[k].sigma*sqrt(2*M_PI))*exp(-pow(std::min(i-gmm_params1[k].mean,255-(i-gmm_params1[k].mean)),2)/(2*pow(gmm_params1[k].sigma,2)));
-			f2[i] = f2[i] + gmm_params2[k].weight*1/(gmm_params2[k].sigma*sqrt(2*M_PI))*exp(-pow(std::min(i-gmm_params2[k].mean,255-(i-gmm_params1[k].mean)),2)/(2*pow(gmm_params2[k].sigma,2)));
+			f2[i] = f2[i] + gmm_params2[k].weight*1/(gmm_params2[k].sigma*sqrt(2*M_PI))*exp(-pow(std::min(i-gmm_params2[k].mean,255-(i-gmm_params2[k].mean)),2)/(2*pow(gmm_params2[k].sigma,2)));
+			f3[i] = f3[i] + gmm_params3[k].weight*1/(gmm_params3[k].sigma*sqrt(2*M_PI))*exp(-pow(std::min(i-gmm_params3[k].mean,255-(i-gmm_params3[k].mean)),2)/(2*pow(gmm_params3[k].sigma,2)));
 		}
 		if (f1[i] > maxf1)
 		{
@@ -389,19 +409,27 @@ cv::Mat BlobTracker::getHistogram(cv::Mat input, cv::Rect roi, std::vector<model
 		{
 			maxf2 = f2[i];
 		}
+		
+		if (f3[i] > maxf3)
+		{
+			maxf3 = f3[i];
+		}
 	}
 	for (int i = 0; i < histSize; i++)
 	{
 		f1[i] =f1[i]/maxf1*histImage.rows;
 		f2[i] =f2[i]/maxf2*histImage.rows;
+		f3[i] =f3[i]/maxf3*histImage.rows;
 	}
 			
 	for (int i = 1; i < histSize-1; i++)
 	{
 		line(histImage, Point(bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1))), Point(bin_w*(i), hist_h - cvRound(b_hist.at<float>(i))), Scalar(0, 255, 0), 2, 8, 0);
 		line(histImage, Point(bin_w*(i-1), hist_h - cvRound(r_hist.at<float>(i-1))), Point(bin_w*(i), hist_h - cvRound(r_hist.at<float>(i))), Scalar(0, 255, 255), 2, 8, 0);
+		line(histImage, Point(bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1))), Point(bin_w*(i), hist_h - cvRound(g_hist.at<float>(i))), Scalar(255, 255, 255), 2, 8, 0);
 		line(histImage, Point(bin_w*(i-1), hist_h - cvRound(f1[i-1])), Point(bin_w*(i), hist_h - cvRound(f1[i])), Scalar(255, 0, 0), 2, 8, 0);
 		line(histImage, Point(bin_w*(i-1), hist_h - cvRound(f2[i-1])), Point(bin_w*(i), hist_h - cvRound(f2[i])), Scalar(0, 0, 255), 2, 8, 0);
+		line(histImage, Point(bin_w*(i-1), hist_h - cvRound(f3[i-1])), Point(bin_w*(i), hist_h - cvRound(f3[i])), Scalar(255, 0, 255), 2, 8, 0);
 	}
 	return histImage;
 }

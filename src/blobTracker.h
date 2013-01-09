@@ -31,7 +31,7 @@ class BlobTracker
 	public:
 		BlobTracker();
 		~BlobTracker();
-		cv::Mat getHistogram(cv::Mat input, cv::Rect roi, std::vector<model_params> gmm_params1, std::vector<model_params> gmm_params2);
+		cv::Mat getHistogram(cv::Mat input, cv::Rect roi, std::vector<model_params> gmm_params1, std::vector<model_params> gmm_params2, std::vector<model_params> gmm_params3);
 		
 	private:
 		ros::Publisher pos_estimate;

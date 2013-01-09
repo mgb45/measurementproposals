@@ -41,6 +41,7 @@ class body
 		bool seen;
 		std::vector<model_params> gmm_params1;
 		std::vector<model_params> gmm_params2;
+		std::vector<model_params> gmm_params3;
 		geometry_msgs::Point leftHand;
 		geometry_msgs::Point rightHand;
 		ParticleFilter *pf1;

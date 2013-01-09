@@ -19,6 +19,7 @@ body::body(cv::Rect roi_in, int N)
 		temp.weight = 1.0/(double)N;
 		gmm_params1.push_back(temp);
 		gmm_params2.push_back(temp);
+		gmm_params3.push_back(temp);
 	}
 	N = 2500;
 	pf1 = new ParticleFilter(N,8,0);
@@ -60,6 +61,7 @@ body::body(const body& other)
 	seen = other.seen;
 	gmm_params1 = other.gmm_params1;
 	gmm_params2 = other.gmm_params2;
+	gmm_params3 = other.gmm_params3;
 	leftHand = other.leftHand;
 	rightHand = other.rightHand;
 	N = 2500;
@@ -91,6 +93,7 @@ body body::operator=( const body& other)
 	newBody.seen = other.seen;
 	newBody.gmm_params1 = other.gmm_params1;
 	newBody.gmm_params2 = other.gmm_params2;
+	newBody.gmm_params3 = other.gmm_params3;
 	newBody.leftHand = other.leftHand;
 	newBody.rightHand = other.rightHand;
 	N = 2500;
@@ -105,6 +108,7 @@ body::~body()
 {
 	gmm_params1.clear();
 	gmm_params2.clear();
+	gmm_params3.clear();
 	delete pf1;
 	delete pf2;
 }
