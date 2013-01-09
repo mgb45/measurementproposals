@@ -20,8 +20,9 @@ body::body(cv::Rect roi_in, int N)
 		gmm_params1.push_back(temp);
 		gmm_params2.push_back(temp);
 	}
-	pf1 = new ParticleFilter(5000,8,0);
-	pf2 = new ParticleFilter(5000,8,1);
+	N = 2500;
+	pf1 = new ParticleFilter(N,8,0);
+	pf2 = new ParticleFilter(N,8,1);
 	
 	std::stringstream ss1;
 	ss1 << ros::package::getPath("handBlobTracker") << "/data1.yml";
@@ -61,8 +62,9 @@ body::body(const body& other)
 	gmm_params2 = other.gmm_params2;
 	leftHand = other.leftHand;
 	rightHand = other.rightHand;
-	pf1 = new ParticleFilter(5000,8,0);
-	pf2 = new ParticleFilter(5000,8,1);
+	N = 2500;
+	pf1 = new ParticleFilter(N,8,0);
+	pf2 = new ParticleFilter(N,8,1);
 	*pf1 = *other.pf1;
 	*pf2 = *other.pf2;
 	/*pf1->N = other.pf1->N;
@@ -91,8 +93,9 @@ body body::operator=( const body& other)
 	newBody.gmm_params2 = other.gmm_params2;
 	newBody.leftHand = other.leftHand;
 	newBody.rightHand = other.rightHand;
-	newBody.pf1 = new ParticleFilter(5000,8,0);
-	newBody.pf2 = new ParticleFilter(5000,8,1);
+	N = 2500;
+	newBody.pf1 = new ParticleFilter(N,8,0);
+	newBody.pf2 = new ParticleFilter(N,8,1);
 	*newBody.pf1 = *other.pf1;
 	*newBody.pf2 = *other.pf2;
 	return newBody;

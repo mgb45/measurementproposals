@@ -59,8 +59,11 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
     SimpleBlobDetector blobDetector(*params);
     blobDetector.create("SimpleBlob");
     
+    //MSER mser_detector(5, M_PI*fmin*fmin/64.0, M_PI*fmax*fmax/2.0, .25, .2);
+    //cvMSERParams( 5, 60, cvRound(.2*img->width*img->height), .25, .2 );
     vector<KeyPoint> keyPoints;
     blobDetector.detect(output, keyPoints);
+    //mser_detector.detect(output, keyPoints);
     
     if ((int)keyPoints.size() >= 2)
     {
@@ -74,7 +77,7 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
 			pt1.x = body_in.roi.x + body_in.roi.width/2.0;
 			pt1.y = body_in.roi.y + body_in.roi.height/2.0;
 			pt1.z = body_in.roi.height;
-			if (blobDist(pt1,keyPoints[i]) > 3.0/2.0*body_in.roi.width)
+			if (blobDist(pt1,keyPoints[i]) > body_in.roi.width)
 			{
 				if (body_in.leftHand.z != -1)
 				{
@@ -176,10 +179,11 @@ cv::Mat BlobTracker::segmentFaces(cv::Mat input, body &face_in)
 {
 	cv::Mat image2(input);
 	cv::Mat image3 = image2.clone();
-	cvtColor(image3,image3,CV_BGR2Lab);
+	cv::Mat image4;
+	cvtColor(image3,image4,CV_BGR2Lab);
 							
 	vector<Mat> bgr_planes;
-	split(image3, bgr_planes);
+	split(image4, bgr_planes);
 				
 	int bestIdx1 = 0, bestIdx2 = 0;
 	double tempMax1=0, tempMax2=0;
@@ -226,12 +230,12 @@ cv::Mat BlobTracker::segmentFaces(cv::Mat input, body &face_in)
     erode(temp1,temp1,element);*/
 
 	cvtColor(temp1,temp1,CV_GRAY2RGB);
-	blobDetector(temp1,face_in,image2);
+	blobDetector(temp1,face_in,image3);
 				
-	rectangle(image2, Point(face_in.roi.x,face_in.roi.y), Point(face_in.roi.x+face_in.roi.width,face_in.roi.y+face_in.roi.height), Scalar(255,255,255), 4, 8, 0);
-	rectangle(image2, Point(face_in.roi.x+ face_in.roi.width/5.0,face_in.roi.y+ face_in.roi.height/5.0), Point(face_in.roi.x+4*face_in.roi.width/5.0,face_in.roi.y+4*face_in.roi.height/5.0), Scalar(0,255,0), 4, 8, 0);
+	rectangle(image3, Point(face_in.roi.x,face_in.roi.y), Point(face_in.roi.x+face_in.roi.width,face_in.roi.y+face_in.roi.height), Scalar(255,255,255), 4, 8, 0);
+	rectangle(image3, Point(face_in.roi.x+ face_in.roi.width/5.0,face_in.roi.y+ face_in.roi.height/5.0), Point(face_in.roi.x+4*face_in.roi.width/5.0,face_in.roi.y+4*face_in.roi.height/5.0), Scalar(0,255,0), 4, 8, 0);
 	
-	return image2;
+	return image3;
 }
 
 void BlobTracker::updateBlobFaces(const faceTracking::ROIArrayConstPtr& msg)
@@ -340,10 +344,10 @@ void BlobTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 cv::Mat BlobTracker::getHistogram(cv::Mat input, cv::Rect roi, std::vector<model_params> gmm_params1, std::vector<model_params> gmm_params2)
 {
 	cv::Rect tempRoi;
-	tempRoi.x = roi.x + roi.width/6.0;
-	tempRoi.y = roi.y + roi.height/6.0;
-	tempRoi.width = 5*roi.width/6.0;
-	tempRoi.height = 5*roi.height/6.0;
+	tempRoi.x = roi.x + roi.width/5.0;
+	tempRoi.y = roi.y + roi.height/5.0;
+	tempRoi.width = 4*roi.width/5.0;
+	tempRoi.height = 4*roi.height/5.0;
 	cv::Mat image2(input, tempRoi);
 	cv::Mat image3 = image2.clone();
 	cvtColor(image3,image3,CV_BGR2Lab);

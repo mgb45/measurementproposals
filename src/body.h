@@ -46,6 +46,7 @@ class body
 		ParticleFilter *pf1;
 		ParticleFilter *pf2;
 	private:
+		int N;
 };
 
 #endif

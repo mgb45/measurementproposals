@@ -136,15 +136,10 @@ void ParticleFilter::update(cv::Mat measurement)
 	double prior[N];
 	double likelihood[N];
 	double weightSum = 0;
-	int i, j ;
-	//#pragma omp parallel 
-	//{
-	//#pragma omp for reduction(+: weightSum) 
+
 	for (int i = 0; i < N; i++)
 	{
 		prior[i] = 0;
-		//likelihood[i] = 1;
-		//#pragma omp parallel for
 		for (int j = 0; j < gmm.N; j++)
 		{
 			//prior[i] = prior[i] + gmm.weight[j]*mvnpdf(particles.row(i),gmm.mean[j],gmm.sigma[j]);
@@ -158,9 +153,7 @@ void ParticleFilter::update(cv::Mat measurement)
 		weights[i] = prior[i]*likelihood[i];
 		weightSum += weights[i];
 	}
-	//}
 
-	//#pragma omp parallel for
 	for (int i = 0; i < N; i++)
 	{
 		weights[i] = weights[i]/weightSum;
@@ -197,7 +190,6 @@ void ParticleFilter::update(cv::Mat measurement)
 	time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
 	start_time = end_time;
 	printf("Predict: %f seconds\n", time1);
-	
 }
 
 double ParticleFilter::maxWeight()
