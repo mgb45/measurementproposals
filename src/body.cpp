@@ -1,3 +1,9 @@
+/*
+ * body.cpp
+ * 
+ * Class for body parameters and pose estimate pf's 
+ * Copyright 2013 Michael Burke <mgb45@cam.ac.uk>
+*/
 #include "body.h"
 
 using namespace std;
@@ -7,24 +13,26 @@ body::body()
 {
 }
 
+//Constructor
 body::body(cv::Rect roi_in, int N)
 {
-	roi = roi_in;
+	roi = roi_in; // roi for face
 	model_params temp;
-	seen = true;
-	for (int k = 0; k < N; k++)
+	seen = true; // face visible
+	for (int k = 0; k < N; k++) // skin colour model initial seed
 	{
 		temp.mean = k*255/(double)N;
-		temp.sigma = 15;
+		temp.sigma = 8;
 		temp.weight = 1.0/(double)N;
 		gmm_params1.push_back(temp);
 		gmm_params2.push_back(temp);
 		gmm_params3.push_back(temp);
 	}
-	N = 2500;
-	pf1 = new ParticleFilter(N,8,0);
-	pf2 = new ParticleFilter(N,8,1);
+	N = 5000;
+	pf1 = new ParticleFilter(N,8,0); // left arm pf
+	pf2 = new ParticleFilter(N,8,1); // right arm pf
 	
+	// Load Kinect GMM priors
 	std::stringstream ss1;
 	ss1 << ros::package::getPath("handBlobTracker") << "/data1.yml";
 	std::stringstream ss2;
@@ -44,8 +52,8 @@ body::body(cv::Rect roi_in, int N)
     fs1.release();
     fs2.release();
     
-    rightHand.z = -1;
-    leftHand.z = -1;
+    rightHand.z = -1; // hand not yet detected
+    leftHand.z = -1; // hand not yet detected
     
 	for (int i = 0; i < 8; i++)
 	{
@@ -54,6 +62,7 @@ body::body(cv::Rect roi_in, int N)
 	}
 }
 
+// copy constr
 body::body(const body& other)
 {
 	id = other.id;
@@ -69,22 +78,9 @@ body::body(const body& other)
 	pf2 = new ParticleFilter(N,8,1);
 	*pf1 = *other.pf1;
 	*pf2 = *other.pf2;
-	/*pf1->N = other.pf1->N;
-	pf1->d = other.pf1->d;
-	pf1->particles = other.pf2->particles;
-	pf1->weights = other.pf2->weights;
-	pf1->im_height = other.pf2->im_height;
-	pf1->im_width = other.pf2->im_width;
-	pf1->gmm = other.pf1->gmm;
-	pf2->N = other.pf2->N;
-	pf2->d = other.pf2->d;
-	pf2->particles = other.pf2->particles;
-	pf2->weights = other.pf2->weights;
-	pf2->im_height = other.pf2->im_height;
-	pf2->im_width = other.pf2->im_width;
-	pf2->gmm = other.pf2->gmm;*/
 }
 
+// copy constr
 body body::operator=( const body& other)
 {
 	body newBody;
@@ -112,4 +108,5 @@ body::~body()
 	delete pf1;
 	delete pf2;
 }
+
 

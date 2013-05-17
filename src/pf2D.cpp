@@ -1,8 +1,15 @@
+/*
+ * pf2D.cpp
+ * 
+ * Copyright 2013 Michael Burke <mgb45@chillip>
+ * 
+ * 
+ */
 #include "pf2D.h"
 
 using namespace cv;
 using namespace std;
-
+// GMM storage class
 my_gmm::my_gmm()
 {
 	N = 0;
@@ -16,7 +23,8 @@ my_gmm::~my_gmm()
 	weight.clear();
 	N = 0;
 }
-		
+
+// Load a gaussian for gmm with mean, sigma and weight		
 void my_gmm::loadGaussian(cv::Mat u, cv::Mat s, double w)
 {
 	N++;
@@ -32,6 +40,7 @@ ParticleFilter::ParticleFilter()
 {
 }
 
+//PF constructor
 ParticleFilter::ParticleFilter(int numParticles, int numDims, bool side1)
 {
 	N = numParticles;
@@ -40,11 +49,13 @@ ParticleFilter::ParticleFilter(int numParticles, int numDims, bool side1)
 	im_height = 480;
 	im_width = 640;
 	particles = cv::Mat(N,d,CV_64F);
+	// Uniform weights
 	for (int i = 0; i < N; i++)
 	{
 		weights.push_back(1.0/(double)N);
 	}
 	
+	// Randomise particles across image
 	for (int i = 0; i < d; i++)
 	{
 		
@@ -64,6 +75,7 @@ ParticleFilter::~ParticleFilter()
 	weights.clear();
 }
 		
+// Weighted	average pose estimate
 cv::Mat ParticleFilter::getEstimator()
 {
 	cv::Mat estimate;
@@ -74,13 +86,14 @@ cv::Mat ParticleFilter::getEstimator()
 	return estimate;
 }
 
+// Random walk motion model
 void ParticleFilter::predict()
 {
 	cv::Mat temp(1,d,CV_64F);
 	//particles = particles + temp;
 	for (int i = 0; i < N; i++)
 	{
-		cv::randn(temp.colRange(2,6),0,15);
+		cv::randn(temp.colRange(2,6),0,5);
 		cv::randn(temp.colRange(6,8),0,5);
 		cv::randn(temp.colRange(0,2),0,5);
 		//cout << temp;
@@ -88,12 +101,14 @@ void ParticleFilter::predict()
 	}
 }
 
+// Evaluate gmm likelihood
 double ParticleFilter::gmmmvnpdf(cv::Mat x_u, cv::Mat sigma_i, double det_in)
 {
 	cv::Mat temp = -0.5*x_u*sigma_i*x_u.t();
 	return det_in*exp(temp.at<double>(0,0));
 }
 
+// Evaulate multivariate gaussian - measurement model
 double ParticleFilter::mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma)
 {
 //	cout << x << std::endl;
@@ -105,6 +120,7 @@ double ParticleFilter::mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma)
 	return 1.0/(pow(2.0*M_PI,sigma.rows/2.0)*sqrt(cv::determinant(sigma)))*exp(temp.at<double>(0,0));
 }
 
+// Evaulate multivariate gaussian with identity sigma - measurement model
 double ParticleFilter::eyemvnpdf(cv::Mat x_u, double scale)
 {
 	cv::Mat temp = -0.5*x_u*1.0/scale*cv::Mat::eye(2,2,CV_64F)*x_u.t();
@@ -128,6 +144,7 @@ double ParticleFilter::eyemvnpdf(cv::Mat x_u, double scale)
 	return measurements.row(minidx);
 }*/
 
+// Update stage
 void ParticleFilter::update(cv::Mat measurement)
 {
 	// Pick best measurement for each particle!
@@ -164,7 +181,7 @@ void ParticleFilter::update(cv::Mat measurement)
 	start_time = end_time;
 	printf("Update: %f seconds\n", time1);
 		
-	resample();
+	resample(); // resample according to weights
 	end_time = clock();
 	time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
 	start_time = end_time;
@@ -185,13 +202,13 @@ void ParticleFilter::update(cv::Mat measurement)
 	imshow (fname, weightImage);                   // Show our image inside it.
 	waitKey(50);*/
 	
-	predict();
+	predict(); // predict new pos
 	end_time = clock();
 	time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
 	start_time = end_time;
 	printf("Predict: %f seconds\n", time1);
 }
-
+// Return best weight
 double ParticleFilter::maxWeight()
 {
 	double mw = 0;
@@ -204,7 +221,7 @@ double ParticleFilter::maxWeight()
 	}
 	return mw;
 }
-
+// Resample according to weights
 void ParticleFilter::resample()
 {
 	cv::Mat old_particles = particles.clone();
