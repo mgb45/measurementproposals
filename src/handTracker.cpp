@@ -24,22 +24,22 @@ HandTracker::HandTracker()
 	ltracker.init(4,2,0,CV_32F);
 	ltracker.transitionMatrix = *(Mat_<float> (4, 4) << 1, 0, dt, 0, 0, 1, 0, dt, 0, 0, 1, 0, 0, 0, 0, 1);
 	setIdentity(ltracker.measurementMatrix);
-	setIdentity(ltracker.processNoiseCov, Scalar::all(80));
+	setIdentity(ltracker.processNoiseCov, Scalar::all(30));
 	ltracker.processNoiseCov.at<float>(0,0) = 0;
 	ltracker.processNoiseCov.at<float>(1,1) = 0;
-	setIdentity(ltracker.measurementNoiseCov, Scalar::all(5));
+	setIdentity(ltracker.measurementNoiseCov, Scalar::all(30));
 	setIdentity(ltracker.errorCovPost, Scalar::all(2));
 	
 	rtracker.init(4,2,0,CV_32F);
 	rtracker.transitionMatrix = *(Mat_<float> (4, 4) << 1, 0, dt, 0, 0, 1, 0, dt, 0, 0, 1, 0, 0, 0, 0, 1);
 	setIdentity(rtracker.measurementMatrix);
-	setIdentity(rtracker.processNoiseCov, Scalar::all(80));
+	setIdentity(rtracker.processNoiseCov, Scalar::all(30));
 	rtracker.processNoiseCov.at<float>(0,0) = 0;
 	rtracker.processNoiseCov.at<float>(1,1) = 0;
-	setIdentity(rtracker.measurementNoiseCov, Scalar::all(5));
+	setIdentity(rtracker.measurementNoiseCov, Scalar::all(30));
 	setIdentity(rtracker.errorCovPost, Scalar::all(2));
 	
-	timePre = = ros::Time::now().toSec();
+	timePre = ros::Time::now().toSec();
 }
 
 cv::Mat HandTracker::predictPos(cv::KalmanFilter &tracker)
@@ -78,9 +78,6 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 	cvtColor(image_or, hsv, CV_BGR2HSV);
 	vector<Mat> bgr_planes;
 	split(hsv, bgr_planes);
-	//~ float hranges[] = {0,180};
-	//~ const float* phranges = hranges;
-	//~ int hsize = 16;
 	
 	// check if hand near intialisation area left
 	geometry_msgs::Point pt1;
@@ -94,11 +91,11 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 	{
 		circle(image3, Point(pt1.x,pt1.y), 50, Scalar(0,255,0), 1, 8, 0);
 		ltracked = true;
-		
-		//~ cv::Mat impatch = bgr_planes[0](cv::Rect(pt1.x-25,pt1.y-25,50,50));
-		//~ calcHist(&impatch, 1, 0, Mat(), rhandHist, 1, &hsize, &phranges);
-		//~ normalize(rhandHist, rhandHist, 0, 255, CV_MINMAX);
+
 		lbox = RotatedRect(Point(pt1.x,pt1.y), Size(50,50),0);
+		ltracker.statePost.at<float>(0) = pt1.x;
+		ltracker.statePost.at<float>(1) = pt1.y;
+		setIdentity(ltracker.errorCovPost, Scalar::all(5));
 	}
 	else
 	{
@@ -119,10 +116,10 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		circle(image3, Point(pt1.x,pt1.y), 50, Scalar(0,255,0), 1, 8, 0);
 		rtracked = true;
 		
-		//~ cv::Mat impatch = bgr_planes[0](cv::Rect(pt1.x-25,pt1.y-25,50,50));
-		//~ calcHist(&impatch, 1, 0, Mat(), rhandHist, 1, &hsize, &phranges);
-		//~ normalize(rhandHist, rhandHist, 0, 255, CV_MINMAX);
 		rbox = RotatedRect(Point(pt1.x,pt1.y), Size(50,50),0);
+		rtracker.statePost.at<float>(0) = pt1.x;
+		rtracker.statePost.at<float>(1) = pt1.y;
+		setIdentity(rtracker.errorCovPost, Scalar::all(5));
 	}
 	else
 	{
@@ -135,14 +132,11 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 	
 	ROS_INFO("Hand scores: %f %f",lhand_score,rhand_score);
 	
-	//~ cv::Mat impatch = bgr_planes[0](face_in.roi);
-	//~ calcHist(&impatch, 1, 0, Mat(), rhandHist, 1, &hsize, &phranges);
-	//~ normalize(rhandHist, rhandHist, 0, 255, CV_MINMAX);
-	
 	if (rtracked)
 	{
-		predictPos(ltracker);
-		
+		//~ Mat prediction = predictPos(rtracker);
+		//~ rbox.center.x = (int)prediction.at<float>(0);
+		//~ rbox.center.y = (int)prediction.at<float>(1);
 		cv::Rect temp = rbox.boundingRect();
 		temp.x = min(temp.x+int(double(temp.width)/2.0)-int(face_in.roi.width/2.0),temp.x);
 		temp.y = min(temp.y+int(double(temp.height)/2.0)-int(face_in.roi.height/2.0),temp.y);
@@ -156,44 +150,36 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		temp.height = min(temp.height,image3.rows-temp.y);
 		rbox = CamShift(likelihood, temp, TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
 					
+		//~ Mat estimate = updatePos(rbox.center.x,rbox.center.y,rtracker);
+		//~ rbox.center.x = (int)estimate.at<float>(0);
+		//~ rbox.center.y = (int)estimate.at<float>(1);
+					
 		ellipse(image3, rbox, Scalar(255,255,0), 2, 8);
-		//~ cv::Mat impatch = bgr_planes[0](temp);
-		//~ calcHist(&impatch, 1, 0, Mat(), rhandHist, 1, &hsize, &phranges);
-		//~ normalize(rhandHist, rhandHist, 0, 255, CV_MINMAX);
 	}
 	
 	if (ltracked)
 	{
-		//~ cv::Mat backproj;
-		//~ calcBackProject(&bgr_planes[0], 1, 0, rhandHist, backproj, &phranges);
+		//~ Mat prediction = predictPos(ltracker);
+		//~ lbox.center.x = (int)prediction.at<float>(0);
+		//~ lbox.center.y = (int)prediction.at<float>(1);
 		cv::Rect temp = lbox.boundingRect();
+		
 		temp.x = min(temp.x+int(double(temp.width)/2.0)-int(face_in.roi.width/2.0),temp.x);
 		temp.y = min(temp.y+int(double(temp.height)/2.0)-int(face_in.roi.height/2.0),temp.y);
 		temp.width = min(temp.width,face_in.roi.width);
 		temp.height = min(temp.height,face_in.roi.height);
-;
 		
 		temp.x = min(max(temp.x,1),image3.cols);
 		temp.y = min(max(temp.y,1),image3.rows);
 		temp.width = min(temp.width,image3.cols-temp.x);
 		temp.height = min(temp.height,image3.rows-temp.y);
 		lbox = CamShift(likelihood, temp, TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
-		//~ temp = lbox.boundingRect();
-		//~ 
-		//~ temp.x = min(temp.x+int(double(temp.width)/2.0)-int(face_in.roi.width/2.0),temp.x);
-		//~ temp.y = min(temp.y+int(double(temp.height)/2.0)-int(face_in.roi.height/2.0),temp.y);
-		//~ temp.width = min(temp.width,face_in.roi.width);
-		//~ temp.height = min(temp.height,face_in.roi.height);
-		//~ 
-		//~ temp.x = min(max(temp.x,1),image3.cols);
-		//~ temp.y = min(max(temp.y,1),image3.rows);
-		//~ temp.width = min(temp.width,image3.cols-temp.x);
-		//~ temp.height = min(temp.height,image3.rows-temp.y);
-					
+		
+		//~ Mat estimate = updatePos(lbox.center.x,lbox.center.y,ltracker);
+		//~ lbox.center.x = (int)estimate.at<float>(0);
+		//~ lbox.center.y = (int)estimate.at<float>(1);
+			
 		ellipse(image3, lbox, Scalar(255,255,0), 2, 8);
-		//~ cv::Mat impatch = bgr_planes[0](temp);
-		//~ calcHist(&impatch, 1, 0, Mat(), rhandHist, 1, &hsize, &phranges);
-		//~ normalize(rhandHist, rhandHist, 0, 255, CV_MINMAX);
 	}
 }
 
@@ -288,7 +274,7 @@ void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 	{	
 		cv::Mat image = (cv_bridge::toCvCopy(immsg, sensor_msgs::image_encodings::RGB8))->image; //ROS
 		
-		dt  = msg->header.stamp.toSec()-dtimePre;
+		dt  = msg->header.stamp.toSec() - timePre;
 		timePre = msg->header.stamp.toSec();
 			
 		updateFaceInfo(msg); // update face list

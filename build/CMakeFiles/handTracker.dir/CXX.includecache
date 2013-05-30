@@ -32,6 +32,10 @@ std_msgs/Header.h
 sensor_msgs/RegionOfInterest.h
 /home/mgb45/Documents/ros_workspace/faceTracking/msg_gen/cpp/include/faceTracking/sensor_msgs/RegionOfInterest.h
 
+/home/mgb45/Documents/ros_workspace/handBlobTracker/src/handTracker.cpp
+handTracker.h
+/home/mgb45/Documents/ros_workspace/handBlobTracker/src/handTracker.h
+
 /home/mgb45/Documents/ros_workspace/handBlobTracker/src/handTracker.h
 opencv2/highgui/highgui.hpp
 /home/mgb45/Documents/ros_workspace/handBlobTracker/src/opencv2/highgui/highgui.hpp
@@ -73,10 +77,6 @@ string
 -
 ros/package.h
 -
-
-/home/mgb45/Documents/ros_workspace/handBlobTracker/src/handTracking.cpp
-handTracker.h
-/home/mgb45/Documents/ros_workspace/handBlobTracker/src/handTracker.h
 
 /opt/ros/fuerte/include/XmlRpcDecl.h
 ros/macros.h
