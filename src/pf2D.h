@@ -36,7 +36,7 @@ class ParticleFilter
 
 		void resample();
 		double mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma);
-		double gmmmvnpdf(cv::Mat x_u, cv::Mat sigma_i, double det_in);
+		double gmmmvnpdf(cv::Mat x_u, cv::Mat sigma_i);
 		double eyemvnpdf(cv::Mat x_u, double sigma);
 		double maxWeight();
 	//	cv::Mat closestMeasurement(cv::Mat measurements, cv::Mat particle);

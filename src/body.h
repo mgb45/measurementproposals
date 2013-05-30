@@ -46,6 +46,7 @@ class body
 		geometry_msgs::Point rightHand;
 		ParticleFilter *pf1;
 		ParticleFilter *pf2;
+		int num_views;
 	private:
 		int N;
 };

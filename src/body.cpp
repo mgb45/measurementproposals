@@ -28,7 +28,7 @@ body::body(cv::Rect roi_in, int N)
 		gmm_params2.push_back(temp);
 		gmm_params3.push_back(temp);
 	}
-	N = 5000;
+	N = 2500;
 	pf1 = new ParticleFilter(N,8,0); // left arm pf
 	pf2 = new ParticleFilter(N,8,1); // right arm pf
 	
@@ -60,6 +60,7 @@ body::body(cv::Rect roi_in, int N)
 		pf2->gmm.loadGaussian(means1.row(i),covs1(Range(8*i,8*(i+1)),Range(0,8)),weights1.at<double>(0,i));
 		pf1->gmm.loadGaussian(means2.row(i),covs2(Range(8*i,8*(i+1)),Range(0,8)),weights2.at<double>(0,i));
 	}
+	num_views = 1;
 }
 
 // copy constr
@@ -78,6 +79,7 @@ body::body(const body& other)
 	pf2 = new ParticleFilter(N,8,1);
 	*pf1 = *other.pf1;
 	*pf2 = *other.pf2;
+	num_views = other.num_views;
 }
 
 // copy constr
@@ -97,6 +99,7 @@ body body::operator=( const body& other)
 	newBody.pf2 = new ParticleFilter(N,8,1);
 	*newBody.pf1 = *other.pf1;
 	*newBody.pf2 = *other.pf2;
+	num_views = other.num_views;
 	return newBody;
 }
 

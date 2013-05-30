@@ -57,7 +57,7 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
     params->maxArea = M_PI*fmax*fmax;
     params->minDistBetweenBlobs = 5.0*fmin/6.0;
 
-    params->minThreshold = 100;
+    params->minThreshold = 110;
     params->maxThreshold = 255;
     params->thresholdStep = 15;
     
@@ -71,9 +71,9 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
     if ((int)keyPoints.size() >= 2) // if at least 2 blobs found
     {
 		int minIdx1 = -1;
-		double minD1 = 100;
+		double minD1 = 200;
 		int minIdx2 = -1; 
-		double minD2 = 100;
+		double minD2 = 200;
 		for (int i = 0; i < (int)keyPoints.size(); i++) // iterate through detected blobs
 		{
 			geometry_msgs::Point pt1;
@@ -82,7 +82,7 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
 			pt1.z = body_in.roi.height;
 			if (blobDist(pt1,keyPoints[i]) > body_in.roi.width) // if blob not near head
 			{
-				if (body_in.leftHand.z != -1) // if hand not already tracked
+				if (body_in.leftHand.z != -1) // if hand already tracked
 				{
 					double temp = blobDist(body_in.leftHand,keyPoints[i]);
 					if (minD1 > temp) // and distance between existing hand position and blob small enough
@@ -93,12 +93,18 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
 				}
 				else // check if hand near intialisation area
 				{
+					
 					geometry_msgs::Point pt1;
 					pt1.x = output.cols/4.0;
 					pt1.y = output.rows/2.0;
 					pt1.z = 20;
+					circle(image3, Point(pt1.x,pt1.y), 5, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 10, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 15, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 20, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 25, Scalar(255,0,0), 1, 8, 0);
 					double temp = blobDist(pt1,keyPoints[i]);
-					if (minD1 > temp)
+					if (50 > temp)
 					{
 						minD1 = temp; // set blob as left hand
 						minIdx1 = i;
@@ -108,7 +114,7 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
 				if (body_in.rightHand.z != -1) // Do same for right hand
 				{
 					double temp = blobDist(body_in.rightHand,keyPoints[i]);
-					if (minD2 > temp)
+					if (50 > temp)
 					{
 						minD2 = temp;
 						minIdx2 = i;
@@ -120,6 +126,11 @@ void BlobTracker::blobDetector(cv::Mat output, body &body_in, cv::Mat image3)
 					pt1.x = output.cols/2.0 + output.cols/4.0;
 					pt1.y = output.rows/2.0;
 					pt1.z = 20;
+					circle(image3, Point(pt1.x,pt1.y), 5, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 10, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 15, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 20, Scalar(255,0,0), 1, 8, 0);
+					circle(image3, Point(pt1.x,pt1.y), 25, Scalar(255,0,0), 1, 8, 0);
 					double temp = blobDist(pt1,keyPoints[i]);
 					if (minD2 > temp)
 					{
@@ -192,15 +203,20 @@ cv::Mat BlobTracker::segmentFaces(cv::Mat input, body &face_in)
 	split(image4, bgr_planes);
 				
 	MatND hist1, hist2;
-	int histSize = 5;
+	int histSize = 15;
 	float h_range[] = {0, 180};
 	float s_range[] = {0, 255};
 	const float* rangesh = {h_range};
 	const float* rangess = {s_range};
-	cv::Mat subImg1 = bgr_planes[0](face_in.roi);
-	medianBlur(subImg1,subImg1,7);
-	cv::Mat subImg2 = bgr_planes[1](face_in.roi);
-	medianBlur(subImg2,subImg2,7);
+	cv::Rect rec_enlarged;
+	rec_enlarged.x = face_in.roi.x+ face_in.roi.width/6;
+	rec_enlarged.y = face_in.roi.y+ face_in.roi.height/6;
+	rec_enlarged.width = face_in.roi.width - face_in.roi.width/6;
+	rec_enlarged.height = face_in.roi.height- face_in.roi.height/6;
+	cv::Mat subImg1 = bgr_planes[0](rec_enlarged);
+	//~ medianBlur(subImg1,subImg1,7);
+	cv::Mat subImg2 = bgr_planes[1](rec_enlarged);
+	//~ medianBlur(subImg2,subImg2,7);
 	calcHist(&subImg1, 1, 0, Mat(), hist1, 1, &histSize, &rangesh, true, false);
 	calcHist(&subImg2, 1, 0, Mat(), hist2, 1, &histSize, &rangess, true, false);
 	normalize(hist1, hist1, 0, 255, NORM_MINMAX, -1, Mat());
@@ -252,11 +268,13 @@ cv::Mat BlobTracker::segmentFaces(cv::Mat input, body &face_in)
 	//~ temp1.convertTo(temp1,CV_8UC1,255.0/maxVal,0);
 	//~ 
 	//~ // Smooth likelihood map
-	medianBlur(temp1,temp1,7);
+	//~ medianBlur(temp1,temp1,7);
+	GaussianBlur(temp1,temp1,cv::Size(15,15),15,15,BORDER_DEFAULT);
 	
 	cvtColor(temp1,temp1,CV_GRAY2RGB);
-	cv::Mat image3 = image2.clone();
-	//~ cv::Mat image3 = temp1.clone(); // uncomment to view likelihood
+		
+	//~ cv::Mat image3 = image2.clone();
+	cv::Mat image3 = temp1.clone(); // uncomment to view likelihood
 	// Detect hands and update pose estimate
 	blobDetector(temp1,face_in,image3);
 				
@@ -321,7 +339,7 @@ void BlobTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 		updateBlobFaces(msg); // update face list
 		
 		//~ int pixels = 100;
-		cv::Mat bigImage = cv::Mat::zeros(image.rows,image.cols*(int)msg->ROIs.size(),image.type()); // large display image
+		cv::Mat bigImage = cv::Mat::zeros(image.rows,image.cols,image.type()); // large display image
 		int posx = 0;
 		int count = (int)faces.size();
 		for (int i = 0; i < count; i++) // iterate through each face
@@ -363,16 +381,18 @@ void BlobTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 				//faces[i].gmm_params3 = gmm_model->expectationMaximisation(test, bgr_planes[0]);
 				// get histogram images to visualise skin colour model
 				//~ histImages.push_back(getHistogram(image,tempRoi,faces[i].gmm_params1,faces[i].gmm_params2,faces[i].gmm_params3));
-
-				Mat roiImgResult_top = bigImage(Rect(posx, 0, image.cols, image.rows));
-				// extract faces and update pose
-				Mat roiImg1 = segmentFaces(image,faces[i]);
-				roiImg1.copyTo(roiImgResult_top); 
-				//~ Mat roiImg2;
-				//~ Mat roiImgResult_bottom = bigImage(Rect(posx,image.rows,image.cols,pixels)); 
-				//~ resize(histImages.back(),roiImg2,Size(image.cols,pixels),0,0,INTER_LINEAR);
-				//~ roiImg2.copyTo(roiImgResult_bottom);
-				posx = posx+image.cols;
+				if (i ==0)
+				{
+					Mat roiImgResult_top = bigImage(Rect(posx, 0, image.cols, image.rows));
+					// extract faces and update pose
+					Mat roiImg1 = segmentFaces(image,faces[i]);
+					roiImg1.copyTo(roiImgResult_top); 
+					//~ Mat roiImg2;
+					//~ Mat roiImgResult_bottom = bigImage(Rect(posx,image.rows,image.cols,pixels)); 
+					//~ resize(histImages.back(),roiImg2,Size(image.cols,pixels),0,0,INTER_LINEAR);
+					//~ roiImg2.copyTo(roiImgResult_bottom);
+					//~ posx = posx+image.cols;
+				}
 			}
 			else // remove missing faces
 			{

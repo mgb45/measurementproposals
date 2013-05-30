@@ -102,10 +102,10 @@ void ParticleFilter::predict()
 }
 
 // Evaluate gmm likelihood
-double ParticleFilter::gmmmvnpdf(cv::Mat x_u, cv::Mat sigma_i, double det_in)
+double ParticleFilter::gmmmvnpdf(cv::Mat x_u, cv::Mat sigma_i)
 {
 	cv::Mat temp = -0.5*x_u*sigma_i*x_u.t();
-	return det_in*exp(temp.at<double>(0,0));
+	return expf(float(temp.at<double>(0,0)));
 }
 
 // Evaulate multivariate gaussian - measurement model
@@ -124,7 +124,7 @@ double ParticleFilter::mvnpdf(cv::Mat x, cv::Mat u, cv::Mat sigma)
 double ParticleFilter::eyemvnpdf(cv::Mat x_u, double scale)
 {
 	cv::Mat temp = -0.5*x_u*1.0/scale*cv::Mat::eye(2,2,CV_64F)*x_u.t();
-	return 1.0/(pow(2.0*M_PI,x_u.cols/2.0)*scale)*exp(temp.at<double>(0,0));
+	return 1.0/(pow(2.0*M_PI*scale,x_u.cols/2.0))*exp(temp.at<double>(0,0));
 }
 
 /*cv::Mat ParticleFilter::closestMeasurement(cv::Mat measurements, cv::Mat particle)
@@ -160,7 +160,7 @@ void ParticleFilter::update(cv::Mat measurement)
 		for (int j = 0; j < gmm.N; j++)
 		{
 			//prior[i] = prior[i] + gmm.weight[j]*mvnpdf(particles.row(i),gmm.mean[j],gmm.sigma[j]);
-			prior[i] = prior[i] + gmm.weight[j]*gmmmvnpdf(particles.row(i)- gmm.mean[j], gmm.sigma_i[j], gmm.det_s[j]);
+			prior[i] = prior[i] + gmm.weight[j]*gmm.det_s[j]*gmmmvnpdf(particles.row(i) - gmm.mean[j], gmm.sigma_i[j]);
 		}
 		//closestMeasurement(measurement,particles(Range(i,i+1),Range(0,2)))
 		//likelihood[i] *= mvnpdf(particles(Range(i,i+1),Range(6,8)),measurement.row(0),15*cv::Mat::eye(2,2,CV_64F));
@@ -188,7 +188,7 @@ void ParticleFilter::update(cv::Mat measurement)
 	printf("Resample: %f seconds\n", time1);
 	
 	// Plot weights
-	cv::Mat weightImage =cv::Mat::zeros(480,640,CV_8UC3);
+	//cv::Mat weightImage =cv::Mat::zeros(480,640,CV_8UC3);
 	/*for (int i = 1; i < N; i++)
 	{
 		line(weightImage, Point(480*(double)i/(double)N, 640 - cvRound(639*weights[i-1]+1)), Point(480*(double)(i+1)/(double)N, 640 - cvRound(639*weights[i]+1)), Scalar(255, 0, 0), 2, 8, 0);
