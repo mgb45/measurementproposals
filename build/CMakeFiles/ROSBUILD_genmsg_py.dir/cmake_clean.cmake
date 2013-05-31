@@ -4,7 +4,8 @@ FILE(REMOVE_RECURSE
   "../msg_gen"
   "CMakeFiles/ROSBUILD_genmsg_py"
   "../src/handBlobTracker/msg/__init__.py"
-  "../src/handBlobTracker/msg/_face_hand.py"
+  "../src/handBlobTracker/msg/_HFPose2DArray.py"
+  "../src/handBlobTracker/msg/_HFPose2D.py"
 )
 
 # Per-language clean rules from dependency scanning.

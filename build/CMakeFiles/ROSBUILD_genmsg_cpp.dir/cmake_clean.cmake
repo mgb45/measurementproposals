@@ -3,7 +3,8 @@ FILE(REMOVE_RECURSE
   "../src/handBlobTracker/msg"
   "../msg_gen"
   "CMakeFiles/ROSBUILD_genmsg_cpp"
-  "../msg_gen/cpp/include/handBlobTracker/face_hand.h"
+  "../msg_gen/cpp/include/handBlobTracker/HFPose2DArray.h"
+  "../msg_gen/cpp/include/handBlobTracker/HFPose2D.h"
 )
 
 # Per-language clean rules from dependency scanning.

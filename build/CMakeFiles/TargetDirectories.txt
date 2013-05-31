@@ -9,6 +9,7 @@
 /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles/rosbuild_precompile.dir
 /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles/rosbuild_premsgsrvgen.dir
 /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles/rospack_genmsg.dir
+/home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles/rospack_genmsg_all.dir
 /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles/rospack_genmsg_libexe.dir
 /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles/rospack_gensrv.dir
 /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles/test.dir

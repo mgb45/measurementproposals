@@ -44,37 +44,66 @@ include CMakeFiles/ROSBUILD_genmsg_py.dir/progress.make
 
 CMakeFiles/ROSBUILD_genmsg_py: ../src/handBlobTracker/msg/__init__.py
 
-../src/handBlobTracker/msg/__init__.py: ../src/handBlobTracker/msg/_face_hand.py
+../src/handBlobTracker/msg/__init__.py: ../src/handBlobTracker/msg/_HFPose2DArray.py
+../src/handBlobTracker/msg/__init__.py: ../src/handBlobTracker/msg/_HFPose2D.py
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/handBlobTracker/msg/__init__.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/face_hand.msg
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/HFPose2DArray.msg /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/HFPose2D.msg
 
-../src/handBlobTracker/msg/_face_hand.py: ../msg/face_hand.msg
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/roslib/bin/gendeps
-../src/handBlobTracker/msg/_face_hand.py: ../manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/roslang/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/roscpp/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/roslib/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/message_filters/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /opt/ros/fuerte/share/rospy/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /home/mgb45/Documents/ros_workspace/faceTracking/manifest.xml
-../src/handBlobTracker/msg/_face_hand.py: /home/mgb45/Documents/ros_workspace/faceTracking/msg_gen/generated
+../src/handBlobTracker/msg/_HFPose2DArray.py: ../msg/HFPose2DArray.msg
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+../src/handBlobTracker/msg/_HFPose2DArray.py: ../msg/HFPose2D.msg
+../src/handBlobTracker/msg/_HFPose2DArray.py: ../manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/roslang/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/roslib/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /opt/ros/fuerte/share/rospy/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /home/mgb45/Documents/ros_workspace/faceTracking/manifest.xml
+../src/handBlobTracker/msg/_HFPose2DArray.py: /home/mgb45/Documents/ros_workspace/faceTracking/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles $(CMAKE_PROGRESS_2)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/handBlobTracker/msg/_face_hand.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/face_hand.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/handBlobTracker/msg/_HFPose2DArray.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/HFPose2DArray.msg
+
+../src/handBlobTracker/msg/_HFPose2D.py: ../msg/HFPose2D.msg
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+../src/handBlobTracker/msg/_HFPose2D.py: ../manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/roslang/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/roslib/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/rosconsole/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/message_filters/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /opt/ros/fuerte/share/rospy/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /home/mgb45/Documents/ros_workspace/faceTracking/manifest.xml
+../src/handBlobTracker/msg/_HFPose2D.py: /home/mgb45/Documents/ros_workspace/faceTracking/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/handBlobTracker/msg/_HFPose2D.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/HFPose2D.msg
 
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py
 ROSBUILD_genmsg_py: ../src/handBlobTracker/msg/__init__.py
-ROSBUILD_genmsg_py: ../src/handBlobTracker/msg/_face_hand.py
+ROSBUILD_genmsg_py: ../src/handBlobTracker/msg/_HFPose2DArray.py
+ROSBUILD_genmsg_py: ../src/handBlobTracker/msg/_HFPose2D.py
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py.dir/build.make
 .PHONY : ROSBUILD_genmsg_py
 

@@ -55,6 +55,7 @@ CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/stacks/vision_ope
 CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/share/std_msgs/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/share/roslib/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracking.o: /opt/ros/fuerte/share/rosconsole/manifest.xml
@@ -94,6 +95,7 @@ CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/stacks/vision_open
 CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/share/std_msgs/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/share/roslib/manifest.xml
 CMakeFiles/handTracker.dir/src/handTracker.o: /opt/ros/fuerte/share/rosconsole/manifest.xml

@@ -42,41 +42,78 @@ CMAKE_BINARY_DIR = /home/mgb45/Documents/ros_workspace/handBlobTracker/build
 # Include the progress variables for this target.
 include CMakeFiles/ROSBUILD_genmsg_lisp.dir/progress.make
 
-CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/face_hand.lisp
+CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/HFPose2DArray.lisp
 CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package.lisp
-CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_face_hand.lisp
+CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_HFPose2DArray.lisp
+CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/HFPose2D.lisp
+CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package.lisp
+CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_HFPose2D.lisp
 
-../msg_gen/lisp/face_hand.lisp: ../msg/face_hand.msg
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/roslib/bin/gendeps
-../msg_gen/lisp/face_hand.lisp: ../manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/roslang/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/roscpp/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/roslib/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/rosconsole/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/message_filters/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /opt/ros/fuerte/share/rospy/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /home/mgb45/Documents/ros_workspace/faceTracking/manifest.xml
-../msg_gen/lisp/face_hand.lisp: /home/mgb45/Documents/ros_workspace/faceTracking/msg_gen/generated
+../msg_gen/lisp/HFPose2DArray.lisp: ../msg/HFPose2DArray.msg
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/roslib/bin/gendeps
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/std_msgs/msg/Header.msg
+../msg_gen/lisp/HFPose2DArray.lisp: ../msg/HFPose2D.msg
+../msg_gen/lisp/HFPose2DArray.lisp: ../manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/roslang/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/roscpp/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/std_msgs/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/roslib/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/rosconsole/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/message_filters/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /opt/ros/fuerte/share/rospy/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /home/mgb45/Documents/ros_workspace/faceTracking/manifest.xml
+../msg_gen/lisp/HFPose2DArray.lisp: /home/mgb45/Documents/ros_workspace/faceTracking/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles $(CMAKE_PROGRESS_1)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/face_hand.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_face_hand.lisp"
-	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/face_hand.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/HFPose2DArray.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_HFPose2DArray.lisp"
+	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/HFPose2DArray.msg
 
-../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/face_hand.lisp
+../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/HFPose2DArray.lisp
 
-../msg_gen/lisp/_package_face_hand.lisp: ../msg_gen/lisp/face_hand.lisp
+../msg_gen/lisp/_package_HFPose2DArray.lisp: ../msg_gen/lisp/HFPose2DArray.lisp
+
+../msg_gen/lisp/HFPose2D.lisp: ../msg/HFPose2D.msg
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/roslib/bin/gendeps
+../msg_gen/lisp/HFPose2D.lisp: ../manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/roslang/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/roscpp/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/std_msgs/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/ros/core/rosbuild/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/roslib/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/rosconsole/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/stacks/pluginlib/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/message_filters/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/stacks/image_common/image_transport/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /opt/ros/fuerte/share/rospy/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /home/mgb45/Documents/ros_workspace/faceTracking/manifest.xml
+../msg_gen/lisp/HFPose2D.lisp: /home/mgb45/Documents/ros_workspace/faceTracking/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/mgb45/Documents/ros_workspace/handBlobTracker/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/HFPose2D.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_HFPose2D.lisp"
+	/opt/ros/fuerte/share/roslisp/rosbuild/scripts/genmsg_lisp.py /home/mgb45/Documents/ros_workspace/handBlobTracker/msg/HFPose2D.msg
+
+../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/HFPose2D.lisp
+
+../msg_gen/lisp/_package_HFPose2D.lisp: ../msg_gen/lisp/HFPose2D.lisp
 
 ROSBUILD_genmsg_lisp: CMakeFiles/ROSBUILD_genmsg_lisp
-ROSBUILD_genmsg_lisp: ../msg_gen/lisp/face_hand.lisp
+ROSBUILD_genmsg_lisp: ../msg_gen/lisp/HFPose2DArray.lisp
 ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package.lisp
-ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_face_hand.lisp
+ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_HFPose2DArray.lisp
+ROSBUILD_genmsg_lisp: ../msg_gen/lisp/HFPose2D.lisp
+ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package.lisp
+ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_HFPose2D.lisp
 ROSBUILD_genmsg_lisp: CMakeFiles/ROSBUILD_genmsg_lisp.dir/build.make
 .PHONY : ROSBUILD_genmsg_lisp
 

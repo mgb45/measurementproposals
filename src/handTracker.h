@@ -21,7 +21,9 @@
 #include <sstream>
 #include <string>
 #include <ros/package.h>
-
+#include "handBlobTracker/HFPose2D.h"
+#include "handBlobTracker/HFPose2DArray.h"
+		
 struct face {
 	cv::Rect roi;
 	std::string id;
@@ -38,6 +40,7 @@ class HandTracker
 		//~ ros::Publisher pos_estimate;
 		ros::NodeHandle nh;
 		image_transport::Publisher pub;
+		ros::Publisher hand_face_pub;
 		
 		void callback(const sensor_msgs::ImageConstPtr& immsg, const faceTracking::ROIArrayConstPtr& msg); // Detected face array/ image callback
 		typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, faceTracking::ROIArray> MySyncPolicy; // synchronising image and face array

@@ -3,9 +3,12 @@ FILE(REMOVE_RECURSE
   "../src/handBlobTracker/msg"
   "../msg_gen"
   "CMakeFiles/ROSBUILD_genmsg_lisp"
-  "../msg_gen/lisp/face_hand.lisp"
+  "../msg_gen/lisp/HFPose2DArray.lisp"
   "../msg_gen/lisp/_package.lisp"
-  "../msg_gen/lisp/_package_face_hand.lisp"
+  "../msg_gen/lisp/_package_HFPose2DArray.lisp"
+  "../msg_gen/lisp/HFPose2D.lisp"
+  "../msg_gen/lisp/_package.lisp"
+  "../msg_gen/lisp/_package_HFPose2D.lisp"
 )
 
 # Per-language clean rules from dependency scanning.
