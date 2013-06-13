@@ -225,8 +225,8 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 	split(image4, bgr_planes);
 				
 	MatND hist1, hist2;
-	int histSize = 255;
-	float h_range[] = {0, 180};
+	int histSize = 100;
+	float h_range[] = {0, 255};
 	float s_range[] = {0, 255};
 	const float* rangesh = {h_range};
 	const float* rangess = {s_range};
