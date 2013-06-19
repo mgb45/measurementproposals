@@ -349,7 +349,7 @@ void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 		img2.image = outputImage;			
 		pub.publish(img2.toImageMsg()); // publish result image
 		
-		if (ltracked&&rtracked)
+		if (ltracked||rtracked)
 		{
 			handBlobTracker::HFPose2D rosHands;
 			handBlobTracker::HFPose2DArray rosHandsArr;
@@ -362,6 +362,9 @@ void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 			rosHands.x = face_found.roi.x + int(face_found.roi.width/2.0);
 			rosHands.y = face_found.roi.y + int(face_found.roi.width/2.0);
 			rosHandsArr.measurements.push_back(rosHands);
+			rosHandsArr.valid.push_back(ltracked);
+			rosHandsArr.valid.push_back(rtracked);
+			rosHandsArr.valid.push_back(true);
 			rosHandsArr.header = msg->header;
 			rosHandsArr.id = face_found.id;
 			hand_face_pub.publish(rosHandsArr);
