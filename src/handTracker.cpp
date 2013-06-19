@@ -148,7 +148,7 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		temp.height = min(temp.height,image3.rows-temp.y);			
 		double tempS = cv::sum(likelihood(temp))[0]/(255.0*temp.width*temp.height);
 		ROS_INFO("%f",tempS);
-		if (tempS < 0.08)
+		if ((tempS < 0.01)||(temp.width <= 5)||(temp.height <= 5))
 		{
 			rtracked = false;
 		}
@@ -156,7 +156,15 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		//~ rbox.center.x = (int)estimate.at<float>(0);
 		//~ rbox.center.y = (int)estimate.at<float>(1);
 					
-		ellipse(image3, rbox, Scalar(255,255,0), 2, 8);
+		try
+		{
+			ellipse(image3, rbox, Scalar(255,255,0), 2, 8);
+		}
+		catch( cv::Exception& e )
+		{
+			const char* err_msg = e.what();
+			ROS_INFO("%s",err_msg);
+		}	
 	}
 	else
 	{
@@ -193,7 +201,7 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		temp.height = min(temp.height,image3.rows-temp.y);			
 		double tempS = cv::sum(likelihood(temp))[0]/(255.0*temp.width*temp.height);
 		ROS_INFO("%f",tempS);
-		if (tempS < 0.08)
+		if ((tempS < 0.01)||(temp.width <= 5)||(temp.height <= 5))
 		{
 			ltracked = false;
 		}
@@ -201,8 +209,14 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		//~ Mat estimate = updatePos(lbox.center.x,lbox.center.y,ltracker);
 		//~ lbox.center.x = (int)estimate.at<float>(0);
 		//~ lbox.center.y = (int)estimate.at<float>(1);
-			
-		ellipse(image3, lbox, Scalar(255,255,0), 2, 8);
+		try
+		{
+			ellipse(image3, lbox, Scalar(255,255,0), 2, 8);
+		}
+		catch( cv::Exception& e )
+		{
+			const char* err_msg = e.what();
+		}	
 	}
 	else
 	{
@@ -225,17 +239,17 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 	split(image4, bgr_planes);
 				
 	MatND hist1, hist2;
-	int histSize = 100;
+	int histSize = 50;
 	float h_range[] = {0, 255};
 	float s_range[] = {0, 255};
 	const float* rangesh = {h_range};
 	const float* rangess = {s_range};
 	
 	cv::Rect rec_enlarged;
-	rec_enlarged.x = face_in.roi.x+ face_in.roi.width/6;
-	rec_enlarged.y = face_in.roi.y+ face_in.roi.height/6;
-	rec_enlarged.width = face_in.roi.width - face_in.roi.width/6;
-	rec_enlarged.height = face_in.roi.height- face_in.roi.height/6;
+	rec_enlarged.x = face_in.roi.x+ face_in.roi.width/4;
+	rec_enlarged.y = face_in.roi.y+ face_in.roi.height/4;
+	rec_enlarged.width = face_in.roi.width - 2*face_in.roi.width/4;
+	rec_enlarged.height = face_in.roi.height- 2*face_in.roi.height/4;
 	cv::Mat subImg1 = bgr_planes[1](rec_enlarged);
 	//~ medianBlur(subImg1,subImg1,7);
 	cv::Mat subImg2 = bgr_planes[2](rec_enlarged);
@@ -279,6 +293,7 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 				
 	// Draw face rectangles on display image
 	rectangle(image3, Point(face_in.roi.x,face_in.roi.y), Point(face_in.roi.x+face_in.roi.width,face_in.roi.y+face_in.roi.height), Scalar(255,255,255), 4, 8, 0);
+	rectangle(image3, Point(rec_enlarged.x,rec_enlarged.y), Point(rec_enlarged.x+rec_enlarged.width,rec_enlarged.y+rec_enlarged.height), Scalar(0,255,0), 4, 8, 0);
 	//~ rectangle(image3, Point(face_in.roi.x+ face_in.roi.width/5.0,face_in.roi.y+ face_in.roi.height/5.0), Point(face_in.roi.x+4*face_in.roi.width/5.0,face_in.roi.y+4*face_in.roi.height/5.0), Scalar(0,255,0), 4, 8, 0);
 	
 	return image3;
