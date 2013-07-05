@@ -70,8 +70,12 @@ HandTracker::~HandTracker()
 void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3)
 {
 	//Set face probability to zero, not a hand
+	int pre_height = face_in.roi.height;
+	face_in.roi.height = min(face_in.roi.height*2,image3.rows-face_in.roi.y);
+	
 	cv::Mat roi(likelihood, face_in.roi);
 	roi = Scalar(0,0,0);
+	face_in.roi.height = pre_height;
 	
 	cv::Mat image_or = image3.clone();
 	
