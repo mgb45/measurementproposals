@@ -24,6 +24,10 @@
 #include "handBlobTracker/HFPose2D.h"
 #include "handBlobTracker/HFPose2DArray.h"
 		
+
+#define lScoreThresh 0.05
+#define lScoreInit 0.2
+		
 struct face {
 	cv::Rect roi;
 	std::string id;
@@ -37,29 +41,28 @@ class HandTracker
 		~HandTracker();
 				
 	private:
-		//~ ros::Publisher pos_estimate;
 		ros::NodeHandle nh;
 		image_transport::Publisher pub;
 		ros::Publisher hand_face_pub;
+		ros::Subscriber pose_sub;
 		
 		void callback(const sensor_msgs::ImageConstPtr& immsg, const faceTracking::ROIArrayConstPtr& msg); // Detected face array/ image callback
+		void poseCallback(const handBlobTracker::HFPose2DArrayConstPtr& msg);
 		typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, faceTracking::ROIArray> MySyncPolicy; // synchronising image and face array
 		message_filters::Synchronizer<MySyncPolicy>* sync;
 		message_filters::Subscriber<sensor_msgs::Image> image_sub;
 		message_filters::Subscriber<faceTracking::ROIArray> roi_sub;
 		face face_found;
 		
-		//~ cv::Mat lhandHist, rhandHist;
 		cv::RotatedRect lbox, rbox;
 		bool rtracked, ltracked;
+		cv::MatND hist1;
 		
-		double timePre, dt;
+		double tempSR, tempSL;
 		
-		cv::KalmanFilter ltracker, rtracker;
+		void checkHandsInitialisation(cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &box, bool &tracked);
+		void updateHandPos(cv::Mat likelihood, cv::Mat image3, cv::RotatedRect &box, bool &tracked, face &face_in);
 		
-		cv::Mat updatePos(float x, float y, cv::KalmanFilter &tracker);
-		cv::Mat predictPos(cv::KalmanFilter &tracker);
-				
 		void updateFaceInfo(const faceTracking::ROIArrayConstPtr& msg);
 		cv::Mat getHandLikelihood(cv::Mat input, face &face_in);
 		void HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3);
