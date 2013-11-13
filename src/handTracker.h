@@ -23,10 +23,10 @@
 #include <ros/package.h>
 #include "handBlobTracker/HFPose2D.h"
 #include "handBlobTracker/HFPose2DArray.h"
-		
+#include <opencv2/video/background_segm.hpp>		
 
-#define lScoreThresh 0.05
-#define lScoreInit 0.2
+#define lScoreThresh 0.01
+#define lScoreInit 0.15
 		
 struct face {
 	cv::Rect roi;
@@ -57,6 +57,8 @@ class HandTracker
 		cv::RotatedRect lbox, rbox;
 		bool rtracked, ltracked;
 		cv::MatND hist1;
+		cv::Ptr<cv::BackgroundSubtractor> pMOG2;
+		cv::Mat fgMaskMOG2;
 		
 		double tempSR, tempSL;
 		
@@ -66,6 +68,7 @@ class HandTracker
 		void updateFaceInfo(const faceTracking::ROIArrayConstPtr& msg);
 		cv::Mat getHandLikelihood(cv::Mat input, face &face_in);
 		void HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3);
+		cv::Rect adjustRect(cv::Rect temp, cv::Size size);
 			
 };
 
