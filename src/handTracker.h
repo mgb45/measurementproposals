@@ -16,8 +16,9 @@
 #include "geometry_msgs/Point.h"
 #include "faceTracking/ROIArray.h"
 #include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/time_synchronizer.h>
+//#include <message_filters/synchronizer.h>
+//#include <message_filters/sync_policies/approximate_time.h>
 #include <sstream>
 #include <string>
 #include <ros/package.h>
@@ -25,8 +26,8 @@
 #include "handBlobTracker/HFPose2DArray.h"
 #include <opencv2/video/background_segm.hpp>		
 
-#define lScoreThresh 0.01
-#define lScoreInit 0.15
+#define lScoreThresh 0.02
+#define lScoreInit 0.14
 		
 struct face {
 	cv::Rect roi;
@@ -44,12 +45,16 @@ class HandTracker
 		ros::NodeHandle nh;
 		image_transport::Publisher pub;
 		ros::Publisher hand_face_pub;
+		image_transport::Publisher likelihood_pub;
 		ros::Subscriber pose_sub;
 		
 		void callback(const sensor_msgs::ImageConstPtr& immsg, const faceTracking::ROIArrayConstPtr& msg); // Detected face array/ image callback
 		void poseCallback(const handBlobTracker::HFPose2DArrayConstPtr& msg);
-		typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, faceTracking::ROIArray> MySyncPolicy; // synchronising image and face array
-		message_filters::Synchronizer<MySyncPolicy>* sync;
+		//typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, faceTracking::ROIArray> MySyncPolicy; // synchronising image and face array
+		//message_filters::Synchronizer<MySyncPolicy>* sync;
+		//message_filters::Subscriber<sensor_msgs::Image> image_sub;
+		//message_filters::Subscriber<faceTracking::ROIArray> roi_sub;
+		message_filters::TimeSynchronizer<sensor_msgs::Image, faceTracking::ROIArray>* sync;
 		message_filters::Subscriber<sensor_msgs::Image> image_sub;
 		message_filters::Subscriber<faceTracking::ROIArray> roi_sub;
 		face face_found;
@@ -62,14 +67,18 @@ class HandTracker
 		
 		double tempSR, tempSL;
 		
-		void checkHandsInitialisation(cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &box, bool &tracked);
-		void updateHandPos(cv::Mat likelihood, cv::Mat image3, cv::RotatedRect &box, bool &tracked, face &face_in);
+		void checkHandsInitialisation (cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &box, bool &tracked);
+		void updateHandPos (cv::Mat likelihood, cv::Mat image3, cv::RotatedRect &box, bool &tracked, face &face_in);
 		
-		void updateFaceInfo(const faceTracking::ROIArrayConstPtr& msg);
-		cv::Mat getHandLikelihood(cv::Mat input, face &face_in);
-		void HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3);
-		cv::Rect adjustRect(cv::Rect temp, cv::Size size);
-			
+		void updateFaceInfo (const faceTracking::ROIArrayConstPtr& msg);
+		cv::Mat getHandLikelihood (cv::Mat input, face &face_in);
+		void HandDetector (cv::Mat likelihood, face &face_in, cv::Mat image3);
+		cv::Rect adjustRect (cv::Rect temp, cv::Size size);
+		
+		cv::KalmanFilter ltracker, rtracker;
+		
+		handBlobTracker::HFPose2DArray pfPose;
+		double e1d,e2d,e3d,e4d;
 };
 
 #endif
