@@ -431,6 +431,8 @@ void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 		if (face_found.views > 0) // get hands
 		{
 			outputImage = getHandLikelihood(image,face_found);
+			ltracked = ltracked&rtracked;
+			rtracked = ltracked;
 		}
 		else
 		{
