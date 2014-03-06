@@ -8,15 +8,11 @@ HandTracker::HandTracker()
 {
 	image_transport::ImageTransport it(nh); //ROS
 	
-	pub = it.advertise("/handImage",1); //ROS
+	pub = it.advertise("/likelihood",1); //ROS
 	hand_face_pub = nh.advertise<handBlobTracker::HFPose2DArray>("/faceHandPose", 10);
-	likelihood_pub = it.advertise("/likelihood", 1);
-	
+		
 	image_sub.subscribe(nh, "/rgb/image_color", 1); // requires camera stream input
 	roi_sub.subscribe(nh, "/faceROIs", 1); // requires face array input
-	pose_sub = nh.subscribe("/correctedFaceHandPose", 1,&HandTracker::poseCallback,this); // requires face array input
-	
-	//sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10),image_sub, roi_sub);
 	
 	sync = new message_filters::TimeSynchronizer<sensor_msgs::Image, faceTracking::ROIArray>(image_sub,roi_sub,10);
 	sync->registerCallback(boost::bind(&HandTracker::callback, this, _1, _2));
@@ -37,9 +33,9 @@ HandTracker::HandTracker()
 	int channels[] = {1, 2};
 	calcHist(&subImg1,1,channels,Mat(),hist1,2,histSize, rangesh, true, false);
 	
-	  pMOG2 = new BackgroundSubtractorMOG2();
+	pMOG2 = new BackgroundSubtractorMOG2();
 	  
-	  double dt = 0.1;
+	double dt = 0.1; // actually 1/ 30fps, but uncertainty in acc tuned for this
 	ltracker.init(6,2,0,CV_32F);
 	ltracker.transitionMatrix = *(Mat_<float> (6, 6) << 1, 0, dt, 0, dt*dt, 0, 0, 1, 0, dt, 0, dt*dt, 0, 0, 1, 0, dt, 0, 0, 0, 0, 1, 0, dt, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1);
 	ltracker.statePre.at<float>(0) = 0;
@@ -50,13 +46,6 @@ HandTracker::HandTracker()
 	ltracker.statePre.at<float>(5) = 0;
 	
 	setIdentity(ltracker.measurementMatrix);
-	//setIdentity(ltracker.processNoiseCov, Scalar::all(1500));
-	//ltracker.processNoiseCov = *(Mat_<float> (6, 6) << pow(dt,5)/20.0, 0, pow(dt,4)/8.0, 0, pow(dt,3)/6.0, 0, 
-														//0, pow(dt,5)/20.0, 0, pow(dt,4)/8.0, 0, pow(dt,3)/6.0, 
-														//pow(dt,4)/8.0, 0, pow(dt,3)/3.0, 0, pow(dt,2)/2.0, 0,
-														//0, pow(dt,4)/8.0, 0, pow(dt,3)/3.0, 0, pow(dt,2)/2.0,
-														//pow(dt,3)/6.0, 0, pow(dt,2)/2.0, 0, dt*10000, 0,
-														//0, pow(dt,3)/6.0, 0, pow(dt,2)/2.0, 0, dt*10000);
 	ltracker.processNoiseCov = *(Mat_<float> (6, 6) << 0, 0, 0, 0, 0, 0, 
 														0, 0, 0, 0, 0, 0, 
 														0, 0, 0, 0, 0, 0,
@@ -78,13 +67,6 @@ HandTracker::HandTracker()
 	rtracker.statePre.at<float>(5) = 0;
 	
 	setIdentity(rtracker.measurementMatrix);
-	//setIdentity(rtracker.processNoiseCov, Scalar::all(1500));
-	//rtracker.processNoiseCov = *(Mat_<float> (6, 6) << pow(dt,5)/20.0, 0, pow(dt,4)/8.0, 0, pow(dt,3)/6.0, 0, 
-														//0, pow(dt,5)/20.0, 0, pow(dt,4)/8.0, 0, pow(dt,3)/6.0, 
-														//pow(dt,4)/8.0, 0, pow(dt,3)/3.0, 0, pow(dt,2)/2.0, 0,
-														//0, pow(dt,4)/8.0, 0, pow(dt,3)/3.0, 0, pow(dt,2)/2.0,
-														//pow(dt,3)/6.0, 0, pow(dt,2)/2.0, 0, dt*10000, 0,
-														//0, pow(dt,3)/6.0, 0, pow(dt,2)/2.0, 0, dt*10000);
 	rtracker.processNoiseCov = *(Mat_<float> (6, 6) << 0, 0, 0, 0, 0, 0, 
 														0, 0, 0, 0, 0, 0, 
 														0, 0, 0, 0, 0, 0,
@@ -95,27 +77,11 @@ HandTracker::HandTracker()
 	setIdentity(rtracker.measurementNoiseCov, Scalar::all(5));
 	setIdentity(rtracker.errorCovPost, Scalar::all(500000));
 	setIdentity(rtracker.errorCovPre, Scalar::all(500000));
-	
-	e1d = 1; e2d = 1; e3d = 1; e4d = 1;
 }
 
 HandTracker::~HandTracker()
 {
 	delete sync;
-}
-
-void HandTracker::poseCallback(const handBlobTracker::HFPose2DArrayConstPtr& msg)
-{
-	if (!msg->id.compare(face_found.id))
-	{
-		pfPose = *msg;
-		//lbox.center.x = msg->measurements[0].x;
-		//lbox.center.y = msg->measurements[0].y;
-		//rbox.center.x = msg->measurements[1].x;
-		//rbox.center.y = msg->measurements[1].y;
-		//ltracked = true;
-		//rtracked = true;
-	}
 }
 
 void HandTracker::checkHandsInitialisation(cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &box, bool &tracked)
@@ -124,7 +90,7 @@ void HandTracker::checkHandsInitialisation(cv::Mat likelihood, cv::Mat image3, d
 	if (!tracked)
 	{
 		cv::Rect temp;
-		temp.x = xShift + image3.cols/16;
+		temp.x = image3.cols/16 + xShift;
 		temp.y = image3.rows/8;
 		temp.width = image3.cols/2-2*image3.cols/16;
 		temp.height = image3.rows - 2*image3.rows/8;
@@ -181,29 +147,6 @@ void HandTracker::checkHandsInitialisation(cv::Mat likelihood, cv::Mat image3, d
 			ellipse(image3, box, Scalar(0,255,0), 2, 8);
 		}
 	}
-	/**********Initialisation using image area **************/
-	//~ geometry_msgs::Point ptl;
-	//~ ptl.x = likelihood.cols/4.0 + xShift;
-	//~ ptl.y = likelihood.rows/2.0;
-	//~ ptl.z = 20;
-		//~ 
-	//~ double lhand_score = cv::sum(likelihood(cv::Rect(ptl.x-25,ptl.y-25,50,50)))[0]/(255.0*50*50);
-	//~ if ((lhand_score > lScoreInit)&&(!tracked))
-	//~ {
-		//~ circle(image3, Point(ptl.x,ptl.y), 50, Scalar(0,255,0), 1, 8, 0);
-//~ 
-		//~ box = (RotatedRect(Point(ptl.x,ptl.y), Size(50,50),0));
-		//~ tracked = true;
-	//~ }
-	//~ 
-	//~ if (!tracked)
-	//~ {
-		//~ circle(image3, Point(ptl.x,ptl.y), 5, Scalar(255,0,0), 1, 8, 0);
-		//~ circle(image3, Point(ptl.x,ptl.y), 10, Scalar(255,0,0), 1, 8, 0);
-		//~ circle(image3, Point(ptl.x,ptl.y), 15, Scalar(255,0,0), 1, 8, 0);
-		//~ circle(image3, Point(ptl.x,ptl.y), 20, Scalar(255,0,0), 1, 8, 0);
-		//~ circle(image3, Point(ptl.x,ptl.y), 25, Scalar(255,0,0), 1, 8, 0);
-	//~ }
 }
 
 cv::Rect HandTracker::adjustRect(cv::Rect temp,cv::Size size)
@@ -272,9 +215,9 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 	roi_enlarged.y = face_in.roi.height/2 + face_in.roi.y - roi_enlarged.height/3;
 	roi_enlarged = adjustRect(roi_enlarged,image3.size());
 		
-	//cv::Mat roi(likelihood, roi_enlarged);
-	//roi = Scalar(0,0,0);
 	ellipse(likelihood, RotatedRect(Point2f(roi_enlarged.x+roi_enlarged.width/2.0,roi_enlarged.y+roi_enlarged.height/2.0),Size2f(roi_enlarged.width,roi_enlarged.height),0.0), Scalar(0,0,0), -1, 8);
+	
+	cvtColor(likelihood,image3,CV_GRAY2RGB);
 	
 	cv::Mat tempLikelihoodL,tempLikelihoodR;
 	likelihood.copyTo(tempLikelihoodL); 
@@ -288,7 +231,7 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		eigen(rtracker.errorCovPre(Range(0,2),Range(0,2)),eigenvals,eigenvecs);
 		try
 		{
-			ellipse(image3,RotatedRect(Point2f(rbox.center.x,rbox.center.y),Size2f(3*sqrt(eigenvals.at<float>(0,0)),3*sqrt(eigenvals.at<float>(1,0))),atan2(eigenvecs.at<float>(0,0),eigenvecs.at<float>(1,0))), Scalar(255,125,125), 1, 8);
+			ellipse(image3,RotatedRect(Point2f(rbox.center.x,rbox.center.y),Size2f(3*sqrt(eigenvals.at<float>(0,0)),3*sqrt(eigenvals.at<float>(1,0))),atan2(eigenvecs.at<float>(0,0),eigenvecs.at<float>(1,0))), Scalar(255,0,0), 2, 8);
 		}
 		catch (cv::Exception& e )
 		{
@@ -329,7 +272,7 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 		eigen(ltracker.errorCovPre(Range(0,2),Range(0,2)),eigenvals,eigenvecs);
 		try
 		{
-			ellipse(image3,RotatedRect(Point2f(lbox.center.x,lbox.center.y),Size2f(3*sqrt(eigenvals.at<float>(0,0)),3*sqrt(eigenvals.at<float>(1,0))),atan2(eigenvecs.at<float>(0,0),eigenvecs.at<float>(1,0))), Scalar(255,125,125), 1, 8);
+			ellipse(image3,RotatedRect(Point2f(lbox.center.x,lbox.center.y),Size2f(3*sqrt(eigenvals.at<float>(0,0)),3*sqrt(eigenvals.at<float>(1,0))),atan2(eigenvecs.at<float>(0,0),eigenvecs.at<float>(1,0))), Scalar(255,0,0), 2, 8);
 		}
 		catch (cv::Exception& e )
 		{
@@ -418,8 +361,6 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 	cv::Mat temp1(input.rows,input.cols,CV_64F);
 	calcBackProject(&foreground,1,channels,hist1,temp1,rangesh, 1, true);
 	
-	//GaussianBlur(temp1,temp1,cv::Size(5,5),1,1,BORDER_DEFAULT);
-	
 	Mat element0 = getStructuringElement( MORPH_ELLIPSE, Size( 2*3 + 1, 2*3+1 ), Point( 3, 3 ) );
 	Mat element1 = getStructuringElement( MORPH_ELLIPSE, Size( 2*5 + 1, 2*5+1 ), Point( 5, 5 ) );
 	Mat element2 = getStructuringElement( MORPH_ELLIPSE, Size( 2*2 + 1, 2*2+1 ), Point( 2, 2 ) );
@@ -429,119 +370,7 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 	dilate(temp1,temp1,element2);
 
 
-	cv::Mat image3 = cv::Mat::zeros(image4.rows,image4.cols,CV_8UC3);;//foreground.clone(); // uncomment to view likelihood
-	
-	//~ 
-	Mat dst;
-	Canny(image4, dst, 90, 200, 3);
-	//~ cvtColor(image3,image3,CV_GRAY2RGB);
-		
-
-	vector<Vec4i> lines;
-	HoughLinesP(dst, lines, 1, CV_PI/180, 10, 6, 10 );
-	int e1=0,e2=0,e3=0,e4=0;
-	for( size_t i = 0; i < lines.size(); i++ )
-	{
-		Vec4i l = lines[i];
-		line(image3, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 1, CV_AA);
-		
-		if (pfPose.measurements.size() > 0)
-		{
-			line(image3, Point(pfPose.measurements[1].x, pfPose.measurements[1].y), Point(pfPose.measurements[5].x, pfPose.measurements[5].y), Scalar(0,255,255), 3, CV_AA);
-			line(image3, Point(pfPose.measurements[0].x, pfPose.measurements[0].y), Point(pfPose.measurements[4].x, pfPose.measurements[4].y), Scalar(255,0,255), 3, CV_AA);
-			line(image3, Point(pfPose.measurements[7].x, pfPose.measurements[7].y), Point(pfPose.measurements[5].x, pfPose.measurements[5].y), Scalar(0,255,0), 3, CV_AA);
-			line(image3, Point(pfPose.measurements[6].x, pfPose.measurements[6].y), Point(pfPose.measurements[4].x, pfPose.measurements[4].y), Scalar(255,255,0), 3, CV_AA);
-			double a1  = atan2(l[3]-l[1],l[2]-l[0]);
-			double m1 = (l[0]+l[2])/2.0;
-			double m2 = (l[1]+l[3])/2.0;
-			
-			double m3 = (pfPose.measurements[1].x + pfPose.measurements[5].x)/2.0;
-			double m4 = (pfPose.measurements[1].y + pfPose.measurements[5].y)/2.0;
-			double a2  = atan2(pfPose.measurements[1].y-pfPose.measurements[5].y,pfPose.measurements[1].x-pfPose.measurements[5].x);
-			
-			double m5 = (pfPose.measurements[0].x + pfPose.measurements[4].x)/2.0;
-			double m6 = (pfPose.measurements[0].y + pfPose.measurements[4].y)/2.0;
-			double a3  = atan2(pfPose.measurements[0].y-pfPose.measurements[4].y,pfPose.measurements[0].x-pfPose.measurements[4].x);
-			
-			double m7 = (pfPose.measurements[7].x + pfPose.measurements[5].x)/2.0;
-			double m8 = (pfPose.measurements[7].y + pfPose.measurements[5].y)/2.0;
-			double a4  = atan2(pfPose.measurements[7].y-pfPose.measurements[5].y,pfPose.measurements[7].x-pfPose.measurements[5].x);
-			
-			double m9 = (pfPose.measurements[6].x + pfPose.measurements[4].x)/2.0;
-			double m10 = (pfPose.measurements[6].y + pfPose.measurements[4].y)/2.0;
-			double a5  = atan2(pfPose.measurements[6].y-pfPose.measurements[4].y,pfPose.measurements[6].x-pfPose.measurements[4].x);
-			
-			//~ ROS_INFO("%f",atan2(sin(a2 - a1),cos(a2 - a1)));
-			double d1 = pow(m4-m2,2)+pow(m3-m1,2);
-			double d2 = pow(m6-m2,2)+pow(m5-m1,2);
-			double d3 = pow(m8-m2,2)+pow(m7-m1,2);
-			double d4 = pow(m10-m2,2)+pow(m9-m1,2);
-			
-			double temp = exp(-0.5*(1.0/125.0*d1 + 1.0/0.01*pow(atan(sin(a2 - a1)/cos(a2 - a1)),2)));//
-			//~ e1 = e1 + temp; 
-			if (temp > 1e-4)
-			{
-				e1++;
-				line(image3, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,255,255), 1, CV_AA);
-				//~ ROS_INFO("Green %f %f",atan(sin(a2 - a1)/cos(a2 - a1))*180/M_PI,d1);
-			}		
-			
-			temp = exp(-0.5*(1.0/125.0*d2 + 1.0/0.01*pow(atan(sin(a3 - a1)/cos(a3 - a1)),2)));// 1.0/sqrt(pow(2*M_PI,3)*pow(125,2)*0.6)*
-			if (temp > 1e-4)
-			{
-				e2++;
-				line(image3, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255,0,255), 1, CV_AA);
-				//~ ROS_INFO("Red %f %f",atan(sin(a3 - a1)/cos(a3 - a1))*180/M_PI,d2);
-			}
-			//~ e2 = e2 + temp;
-			
-			temp = exp(-0.5*(1.0/125.0*d3 + 1.0/0.01*pow(atan(sin(a4 - a1)/cos(a4 - a1)),2)));// 1.0/sqrt(pow(2*M_PI,3)*pow(125,2)*0.6)*
-			if (temp > 1e-4)
-			{
-				e3++;
-				line(image3, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,255,0), 1, CV_AA);
-				//~ ROS_INFO("Red %f %f",atan(sin(a3 - a1)/cos(a3 - a1))*180/M_PI,d2);
-			}
-			//~ e3 = e3 + temp;
-			
-			temp = exp(-0.5*(1.0/125.0*d4 + 1.0/0.01*pow(atan(sin(a5 - a1)/cos(a5 - a1)),2)));// 1.0/sqrt(pow(2*M_PI,3)*pow(125,2)*0.6)*
-			if (temp > 1e-4)
-			{
-				e4++;
-				line(image3, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255,255,0), 1, CV_AA);
-				//~ ROS_INFO("Red %f %f",atan(sin(a3 - a1)/cos(a3 - a1))*180/M_PI,d2);
-			}
-			//~ e2 = e2 + temp;
-			
-			
-		}
-	}
-	if (pfPose.measurements.size() > 0)
-	{
-		pfPose.measurements.clear();
-		pfPose.names.clear();
-		e1d = 0.75*e1d+0.25*e1;
-		e2d = 0.75*e2d+0.25*e2;
-		e3d = 0.75*e3d+0.25*e3;
-		e4d = 0.75*e4d+0.25*e4;
-		
-		if ((e1d < 1)||(e3d < 1))
-		{
-			rtracked = false;
-			ROS_WARN("Reset (line check fail): %f %f",e1d,e3d);
-			e1d = 1;
-			e3d = 1;
-		}
-		
-		if ((e2d < 1)||(e4d < 1))
-		{
-			ltracked = false;
-			ROS_WARN("Reset (line check fail): %f %f",e2d,e4d);
-			e2d = 1;
-			e4d = 1;
-		}
-		ROS_DEBUG("Forearm evidence: %f %f %f %f",e1d,e2d,e3d,e4d);
-	}
+	cv::Mat image3 = cv::Mat::zeros(image4.rows,image4.cols,CV_8UC3);
 	
 	ROS_DEBUG("Entry: %d %d",ltracked,rtracked);
 
@@ -552,14 +381,7 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 	rectangle(image3, Point(face_in.roi.x,face_in.roi.y), Point(face_in.roi.x+face_in.roi.width,face_in.roi.y+face_in.roi.height), Scalar(255,255,255), 4, 8, 0);
 	rectangle(image3, Point(rec_enlarged.x,rec_enlarged.y), Point(rec_enlarged.x+rec_enlarged.width,rec_enlarged.y+rec_enlarged.height), Scalar(0,255,0), 4, 8, 0);
 	
-	cv_bridge::CvImage img2;
-	img2.encoding = "mono8";
-	img2.image = temp1;			
-	likelihood_pub.publish(img2.toImageMsg()); // publish result image
-	
 	return image3;
-	//~ return foreground;
-	//return foreground;
 }
 
 // Update tracked face with latest info
@@ -599,7 +421,6 @@ void HandTracker::updateFaceInfo(const faceTracking::ROIArrayConstPtr& msg)
 // image and face roi callback
 void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTracking::ROIArrayConstPtr& msg)
 {
-	//~ ROS_INFO ("Message received");
 	try
 	{	
 		cv::Mat image = (cv_bridge::toCvCopy(immsg, sensor_msgs::image_encodings::RGB8))->image; //ROS
@@ -610,6 +431,11 @@ void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTr
 		if (face_found.views > 0) // get hands
 		{
 			outputImage = getHandLikelihood(image,face_found);
+		}
+		else
+		{
+			ltracked = false;
+			rtracked = false;
 		}
 		cv_bridge::CvImage img2;
 		img2.encoding = "rgb8";

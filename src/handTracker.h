@@ -17,8 +17,6 @@
 #include "faceTracking/ROIArray.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-//#include <message_filters/synchronizer.h>
-//#include <message_filters/sync_policies/approximate_time.h>
 #include <sstream>
 #include <string>
 #include <ros/package.h>
@@ -45,15 +43,9 @@ class HandTracker
 		ros::NodeHandle nh;
 		image_transport::Publisher pub;
 		ros::Publisher hand_face_pub;
-		image_transport::Publisher likelihood_pub;
-		ros::Subscriber pose_sub;
-		
+				
 		void callback(const sensor_msgs::ImageConstPtr& immsg, const faceTracking::ROIArrayConstPtr& msg); // Detected face array/ image callback
-		void poseCallback(const handBlobTracker::HFPose2DArrayConstPtr& msg);
-		//typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, faceTracking::ROIArray> MySyncPolicy; // synchronising image and face array
-		//message_filters::Synchronizer<MySyncPolicy>* sync;
-		//message_filters::Subscriber<sensor_msgs::Image> image_sub;
-		//message_filters::Subscriber<faceTracking::ROIArray> roi_sub;
+
 		message_filters::TimeSynchronizer<sensor_msgs::Image, faceTracking::ROIArray>* sync;
 		message_filters::Subscriber<sensor_msgs::Image> image_sub;
 		message_filters::Subscriber<faceTracking::ROIArray> roi_sub;
@@ -78,7 +70,6 @@ class HandTracker
 		cv::KalmanFilter ltracker, rtracker;
 		
 		handBlobTracker::HFPose2DArray pfPose;
-		double e1d,e2d,e3d,e4d;
 };
 
 #endif
