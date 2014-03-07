@@ -51,23 +51,24 @@ class HandTracker
 		message_filters::Subscriber<faceTracking::ROIArray> roi_sub;
 		face face_found;
 		
-		cv::RotatedRect lbox, rbox;
-		bool rtracked, ltracked;
+		
 		cv::MatND hist1;
 		cv::Ptr<cv::BackgroundSubtractor> pMOG2;
 		cv::Mat fgMaskMOG2;
 		
 		double tempSR, tempSL;
 		
-		void checkHandsInitialisation (cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &box, bool &tracked);
-		void updateHandPos (cv::Mat likelihood, cv::Mat image3, cv::RotatedRect &box, bool &tracked, face &face_in);
+		void checkHandsInitialisation (cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &roi, bool &track);
+		void updateHandPos (cv::Mat likelihood, cv::Mat image3, cv::RotatedRect &roi, bool &track, face &face_in);
 		
 		void updateFaceInfo (const faceTracking::ROIArrayConstPtr& msg);
 		cv::Mat getHandLikelihood (cv::Mat input, face &face_in);
 		void HandDetector (cv::Mat likelihood, face &face_in, cv::Mat image3);
 		cv::Rect adjustRect (cv::Rect temp, cv::Size size);
 		
-		cv::KalmanFilter ltracker, rtracker;
+		std::vector<cv::KalmanFilter> tracker;
+		std::vector<cv::RotatedRect> box;
+		bool tracked[2];
 		
 		handBlobTracker::HFPose2DArray pfPose;
 };
