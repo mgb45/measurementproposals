@@ -24,7 +24,7 @@ HandTracker::HandTracker()
 	
 	cv::Mat subImg1 = cv::Mat::zeros(50,50,CV_8UC3);
 	
-	int histSize[] = {60,60};
+	int histSize[] = {20,20};
 	float h_range[] = {0, 255};
 	float s_range[] = {0, 255};
 	const float* rangesh[] = {h_range,s_range};
@@ -152,8 +152,8 @@ void HandTracker::updateHandPos(cv::Mat likelihood, cv::Mat image3, cv::RotatedR
 {
 	if (track)
 	{
-		roi.size.width = roi.size.width*2.5;
-		roi.size.height = roi.size.height*2.5;
+		roi.size.width = roi.size.width*2.1;
+		roi.size.height = roi.size.height*2.1;
 		cv::Rect temp = roi.boundingRect();
 		
 		try
@@ -283,29 +283,28 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 // Gets skin colour likelihood map from face using back projection in Lab
 cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 {
-	cv::Mat image2(input);
 	cv::Mat image4;
-	cvtColor(image2,image4,CV_BGR2Lab);
+	cvtColor(input,image4,CV_BGR2Lab);
 				
 	MatND hist;
-	int histSize[] = {60,60};
+	int histSize[] = {20,20};
 	float h_range[] = {0, 255};
 	float s_range[] = {0, 255};
 	const float* rangesh[] = {h_range,s_range};
 	
-	cv::Rect rec_enlarged;
-	rec_enlarged.x = face_in.roi.x+ face_in.roi.width/4;
-	rec_enlarged.y = face_in.roi.y+ face_in.roi.height/4;
-	rec_enlarged.width = face_in.roi.width - 2*face_in.roi.width/4;
-	rec_enlarged.height = face_in.roi.height- 2*face_in.roi.height/4;
+	cv::Rect rec_reduced;
+	rec_reduced.x = face_in.roi.x+ face_in.roi.width/4;
+	rec_reduced.y = face_in.roi.y+ face_in.roi.height/4;
+	rec_reduced.width = face_in.roi.width - 2*face_in.roi.width/4;
+	rec_reduced.height = face_in.roi.height- 2*face_in.roi.height/4;
 	
-	pMOG2->operator()(input,fgMaskMOG2,-1);
+	pMOG2->operator()(input,fgMaskMOG2,-10);
 	
 	// Generate output image
 	cv::Mat foreground(image4.size(),CV_8UC3,cv::Scalar(255,255,255)); // all white image
 	image4.copyTo(foreground,fgMaskMOG2); // bg pixels not copied
 	
-	cv::Mat subImg1 = image4(rec_enlarged);
+	cv::Mat subImg1 = image4(rec_reduced);
 	
 	int channels[] = {1, 2};
 	calcHist(&subImg1,1,channels,Mat(),hist,2,histSize, rangesh, true, false);
@@ -315,9 +314,9 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 	cv::Mat temp1(input.rows,input.cols,CV_64F);
 	calcBackProject(&foreground,1,channels,hist1,temp1,rangesh, 1, true);
 	
-	Mat element0 = getStructuringElement( MORPH_ELLIPSE, Size( 2*3 + 1, 2*3+1 ), Point( 3, 3 ) );
-	Mat element1 = getStructuringElement( MORPH_ELLIPSE, Size( 2*5 + 1, 2*5+1 ), Point( 5, 5 ) );
-	Mat element2 = getStructuringElement( MORPH_ELLIPSE, Size( 2*2 + 1, 2*2+1 ), Point( 2, 2 ) );
+	Mat element0 = getStructuringElement(MORPH_ELLIPSE, Size(7,7), Point(3,3));
+	Mat element1 = getStructuringElement(MORPH_ELLIPSE, Size(11,11), Point(5,5));
+	Mat element2 = getStructuringElement(MORPH_ELLIPSE, Size(5,5), Point(2,2));
 	
 	dilate(temp1,temp1,element0);
 	erode(temp1,temp1,element1);
@@ -332,8 +331,8 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 				
 	// Draw face rectangles on display image
 	rectangle(image3, Point(face_in.roi.x,face_in.roi.y), Point(face_in.roi.x+face_in.roi.width,face_in.roi.y+face_in.roi.height), Scalar(255,255,255), 4, 8, 0);
-	rectangle(image3, Point(rec_enlarged.x,rec_enlarged.y), Point(rec_enlarged.x+rec_enlarged.width,rec_enlarged.y+rec_enlarged.height), Scalar(0,255,0), 4, 8, 0);
-	
+	rectangle(image3, Point(rec_reduced.x,rec_reduced.y), Point(rec_reduced.x+rec_reduced.width,rec_reduced.y+rec_reduced.height), Scalar(0,255,0), 4, 8, 0);
+		
 	return image3;
 }
 
