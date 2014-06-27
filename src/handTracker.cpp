@@ -276,6 +276,13 @@ void HandTracker::HandDetector(cv::Mat likelihood, face &face_in, cv::Mat image3
 			box[i].center.y = estimated.at<float>(1);
 		}
 	}
+	
+	// Sanity check on same hand measurements
+	if ((box[0].center.x == box[1].center.x)&&(box[0].center.y == box[1].center.y))
+	{
+		tracked[0]  = false;
+		tracked[1] = false;
+	}
 		
 	ROS_DEBUG("Exit: %d %d",tracked[0],tracked[1]);
 }
