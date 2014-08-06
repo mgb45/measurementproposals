@@ -3,6 +3,8 @@
 using namespace cv;
 using namespace std;
 
+//TODO: Remove hard coded image dimensions, parametise properly.
+
 // Constructer: Body tracker 
 HandTracker::HandTracker()
 {
@@ -24,7 +26,7 @@ HandTracker::HandTracker()
 	
 	cv::Mat subImg1 = cv::Mat::zeros(50,50,CV_8UC3);
 	
-	int histSize[] = {25,25};
+	int histSize[] = {35,35};
 	float h_range[] = {0, 255};
 	float s_range[] = {0, 255};
 	const float* rangesh[] = {h_range,s_range};
@@ -74,24 +76,39 @@ HandTracker::~HandTracker()
 
 void HandTracker::checkHandsInitialisation(cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &roi, bool &track)
 {
+	cv::RotatedRect bestRoi;
+	double tempScore,bestScore = 0;
 	/********Left right hand initialisation ************/
 	if (!track)
 	{
 		cv::Rect temp;
-		temp.x = image3.cols/16 + xShift;
-		temp.y = image3.rows/8;
-		temp.width = image3.cols/2-2*image3.cols/16;
-		temp.height = image3.rows - 2*image3.rows/8;
-		rectangle(image3, temp, Scalar(255,0,0), 2, 8, 0);
+		for (int i = xShift; i <= xShift + (int)image3.cols/2-80; i+=80)
+		{
+			for (int j = 0; j <= (int)image3.rows-80; j+=80)
+			{
+				temp.x = i;//xShift + image3.cols/16;
+				temp.y = j;//image3.rows/8;
+				temp.width = 80;
+				temp.height = 80;
+				rectangle(image3, temp, Scalar(255,0,0), 2, 8, 0);
+				roi = CamShift(likelihood, temp, TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 5, 1 ));
+				roi.size.height = min((int)roi.size.height,50);
+				roi.size.width = min((int)roi.size.width,50);
+				temp = roi.boundingRect();
+				temp = adjustRect(temp,image3.size());
+				tempScore = cv::sum(likelihood(temp))[0]/(255.0*M_PI*temp.width*temp.height/4.0);
+				if (tempScore > bestScore)
+				{
+					bestScore = tempScore;
+					bestRoi = roi;
+				}
+			}
+		}
 		
-		roi = CamShift(likelihood, temp, TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 5, 1 ));
-		
-		roi.size.height = min((int)roi.size.height,20);
-		roi.size.width = min((int)roi.size.width,20);
+		roi = bestRoi;
 		temp = roi.boundingRect();
-		
 		temp = adjustRect(temp,image3.size());
-		
+				
 		try
 		{
 			ellipse(image3, roi, Scalar(255,0,0), 2, 8);
@@ -102,9 +119,9 @@ void HandTracker::checkHandsInitialisation(cv::Mat likelihood, cv::Mat image3, d
 			ROS_ERROR("%s",err_msg);
 		}	
 		
-		tempSR = cv::sum(likelihood(temp))[0]/(255.0*M_PI*temp.width*temp.height/4.0);
-		ROS_DEBUG("Init: %f",tempSR);
-		if ((tempSR < lScoreInit)||(temp.width <= 5)||(temp.height <= 5))
+		
+		ROS_DEBUG("Init: %f",bestScore);
+		if ((bestScore < lScoreInit)||(temp.width <= 5)||(temp.height <= 5))
 		{
 			track = false;
 		}
@@ -294,7 +311,7 @@ cv::Mat HandTracker::getHandLikelihood(cv::Mat input, face &face_in)
 	cvtColor(input,image4,CV_BGR2Lab);
 				
 	MatND hist;
-	int histSize[] = {25,25};
+	int histSize[] = {35,35};
 	float h_range[] = {0, 255};
 	float s_range[] = {0, 255};
 	const float* rangesh[] = {h_range,s_range};
