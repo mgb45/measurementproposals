@@ -20,8 +20,8 @@
 #include <sstream>
 #include <string>
 #include <ros/package.h>
-#include "handBlobTracker/HFPose2D.h"
-#include "handBlobTracker/HFPose2DArray.h"
+#include "measurementproposals/HFPose2D.h"
+#include "measurementproposals/HFPose2DArray.h"
 #include <opencv2/video/background_segm.hpp>		
 
 #define lScoreThresh 0.02
@@ -50,27 +50,20 @@ class HandTracker
 		message_filters::Subscriber<sensor_msgs::Image> image_sub;
 		message_filters::Subscriber<faceTracking::ROIArray> roi_sub;
 		face face_found;
-		
-		
+				
 		cv::MatND hist1;
 		cv::Ptr<cv::BackgroundSubtractor> pMOG2;
 		cv::Mat fgMaskMOG2;
-		
-		double tempSR, tempSL;
-		
-		void checkHandsInitialisation (cv::Mat likelihood, cv::Mat image3, double xShift,cv::RotatedRect &roi, bool &track);
-		void updateHandPos (cv::Mat likelihood, cv::Mat image3, cv::RotatedRect &roi, bool &track, face &face_in);
-		
+					
 		void updateFaceInfo (const faceTracking::ROIArrayConstPtr& msg);
 		cv::Mat getHandLikelihood (cv::Mat input, face &face_in);
-		void HandDetector (cv::Mat likelihood, face &face_in, cv::Mat image3);
-		cv::Rect adjustRect (cv::Rect temp, cv::Size size);
+				
+		double maxWeight(std::vector<double> weights);
+		std::vector<int> resample(std::vector<double> weights, int N);
 		
-		std::vector<cv::KalmanFilter> tracker;
-		std::vector<cv::RotatedRect> box;
-		bool tracked[2];
-		
-		handBlobTracker::HFPose2DArray pfPose;
+		std::vector<int> proposeMeasurements(cv::Mat L_image, int N);
+				
+		measurementproposals::HFPose2DArray pfPose;
 };
 
 #endif
