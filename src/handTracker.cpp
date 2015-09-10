@@ -14,7 +14,7 @@ HandTracker::HandTracker()
 	image_sub.subscribe(nh, "/rgb/image_color", 1); // requires camera stream input
 	roi_sub.subscribe(nh, "/faceROIs", 1); // requires face array input
 	
-	sync = new message_filters::TimeSynchronizer<sensor_msgs::Image, faceTracking::ROIArray>(image_sub,roi_sub,10);
+	sync = new message_filters::TimeSynchronizer<sensor_msgs::Image, facetracking::ROIArray>(image_sub,roi_sub,10);
 	sync->registerCallback(boost::bind(&HandTracker::callback, this, _1, _2));
 	
 	face_found.views = 0;
@@ -113,7 +113,7 @@ std::vector<int> HandTracker::proposeMeasurements(cv::Mat L_image, int N)
 }
 
 // Update tracked face with latest info
-void HandTracker::updateFaceInfo(const faceTracking::ROIArrayConstPtr& msg)
+void HandTracker::updateFaceInfo(const facetracking::ROIArrayConstPtr& msg)
 {
 	if (msg->ROIs.size() > 0)
 	{
@@ -196,7 +196,7 @@ std::vector<int> HandTracker::resample(std::vector<double> weights, int N)
 }
 
 // image and face roi callback
-void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const faceTracking::ROIArrayConstPtr& msg)
+void HandTracker::callback(const sensor_msgs::ImageConstPtr& immsg, const facetracking::ROIArrayConstPtr& msg)
 {
 	try
 	{	

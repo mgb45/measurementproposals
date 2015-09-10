@@ -15,7 +15,7 @@
   <depend package="image_transport"/>
   <depend package="rospy"/>
   <depend package="message_filters"/>
-  <depend package="faceTracking"/>
+  <depend package="facetracking"/>
 </package>
 
 
